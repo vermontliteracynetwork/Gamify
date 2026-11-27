@@ -38,7 +38,8 @@ const HOWS: { id: How; icon: typeof Play; mode?: 'share' | 'live' | 'solo' | 've
   { id: 'board', icon: SquaresFour, mode: 'solo' },
 ];
 // The teacher's order (2026-10-31): who, how, the game, the questions, start.
-const STEPS = ['who', 'how', 'game', 'set', 'go'] as const;
+// The game comes second (owner, 2026-11-27: "second step in create an activity needs to be choosing the game").
+const STEPS = ['who', 'game', 'how', 'set', 'go'] as const;
 
 export default function ActivityPage() {
   const tier = useTier();
@@ -88,8 +89,9 @@ export default function ActivityPage() {
   // A game for each student and the choice board take solo games and
   // two-player games played against the computer (teacher, 2026-10-31).
   const ownDevice = (g: (typeof GAMES)[number]) => g.modes.includes('solo') || g.modes.includes('versus');
-  const fits = (g: (typeof GAMES)[number]) => !how || (how === 'each' || how === 'board' ? ownDevice(g) : g.modes.includes(HOWS.find((h) => h.id === how)!.mode!));
-  const ready = [true, !!how && !locked(how) && !needsClass(how) && !(how === 'homework' && hwChoice !== 'one' && !classId) && !(how === 'homework' && hwChoice === 'themes' && hwThemes.length < 2), how === 'board' ? board.length > 1 : anyGame || !!game, !!set, true][step];
+  // A way the picked game cannot play is shown but cannot be picked.
+  const fitsHow = (id: How) => !game || (id === 'each' || id === 'board' ? ownDevice(game) : game.modes.includes(HOWS.find((h) => h.id === id)!.mode!));
+  const ready = [true, !!game, !!how && !locked(how) && !needsClass(how) && !(how === 'homework' && hwChoice !== 'one' && !classId) && !(how === 'homework' && hwChoice === 'themes' && hwThemes.length < 2) && fitsHow(how as How) && (how !== 'board' || board.length > 1), !!set, true][step];
   const showClasses = TIERS[tier].hasClasses && classes.length > 0;
 
   async function finish() {
@@ -123,8 +125,8 @@ export default function ActivityPage() {
   const className = classes.find((c) => c.id === classId)?.name;
   const choices: { step: number; value: string }[] = [
     { step: 0, value: className ?? t('activity.anyone') },
-    { step: 1, value: how ? t(`activity.how.${how}`) : '' },
-    { step: 2, value: how === 'board' ? board.map((id) => GAMES.find((g) => g.id === id)?.name).join(', ') : game?.name ?? '' },
+    { step: 1, value: game?.name ?? '' },
+    { step: 2, value: how === 'board' ? `${t('activity.how.board')}: ${board.map((id) => GAMES.find((g) => g.id === id)?.name).join(', ')}` : how ? t(`activity.how.${how}`) : '' },
     { step: 3, value: set ? `${set.name || t('sets.untitled')}, ${t('activity.questions', { count: set.questions.length })}` : '' },
   ];
   const supported = students.filter((st) => st.accommodations && (st.accommodations.tools?.listen || (st.accommodations.triesPerQuestion ?? 1) > 1 || (st.accommodations.readFirstSeconds ?? 0) > 0));
@@ -213,18 +215,15 @@ export default function ActivityPage() {
           </div>
         )}
 
-        {STEPS[step] === 'game' && anyGame && <Panel><p className="font-bold text-lg m-0">{t('activity.hw.anyNote')}</p></Panel>}
-        {STEPS[step] === 'game' && !anyGame && (
-          <div role={how === 'board' ? 'group' : 'radiogroup'} aria-label={t(how === 'board' ? 'activity.boardPick' : 'activity.q.game')} className="grid gap-3">
-            {how === 'board' && <p className="font-bold">{t('activity.boardPick')}</p>}
-            {how === 'each' && <p className="font-bold">{t('activity.eachPick')}</p>}
+        {STEPS[step] === 'game' && (
+          <div role="radiogroup" aria-label={t('activity.q.game')} className="grid gap-3">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {GAMES.filter(fits).map((g) => {
+              {GAMES.map((g) => {
                 const open = canPlayGame(tier, g.id);
-                const on = how === 'board' ? board.includes(g.id) : gameId === g.id;
+                const on = gameId === g.id;
                 return (
-                  <button key={g.id} type="button" role={how === 'board' ? 'checkbox' : 'radio'} aria-checked={on} disabled={!open}
-                    onClick={() => how === 'board' ? setBoard(on ? board.filter((x) => x !== g.id) : [...board, g.id]) : setGameId(g.id)}
+                  <button key={g.id} type="button" role="radio" aria-checked={on} disabled={!open}
+                    onClick={() => { setGameId(g.id); setHow(''); setBoard([]); }}
                     className={`${card(on)} overflow-hidden disabled:opacity-40`}>
                     <span className="relative block"><GameCover gameId={g.id} className="aspect-[16/10]" />{!open && <LockSimple weight="fill" size={28} className="absolute top-2 right-2" />}</span>
                     <span className="p-2 grid gap-1"><span className="font-display text-lg">{g.name}</span>{/* Just the icon in its color, small, in one row (teacher, 2026-11-16). */}
@@ -247,21 +246,34 @@ export default function ActivityPage() {
                 <div role="radiogroup" aria-label={t(`activity.group.${g}`)} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   {hows.filter((h) => (ids as readonly string[]).includes(h.id)).map(({ id, icon: Icon, mode }) => {
                     const plan = planFor(id);
-                    const off = !!plan || needsClass(id);
+                    const off = !!plan || needsClass(id) || !fitsHow(id);
                     return (
-                      <button key={id} type="button" role="radio" aria-checked={how === id} onClick={() => { setHow(id); setBoard([]); const g = GAMES.find((x) => x.id === gameId); if (g && !(id === 'each' || id === 'board' ? ownDevice(g) : g.modes.includes(HOWS.find((h) => h.id === id)!.mode!))) setGameId(''); }}
+                      <button key={id} type="button" role="radio" aria-checked={how === id} onClick={() => { setHow(id); setBoard(id === 'board' && gameId ? [gameId] : []); }}
                         className={`relative min-h-36 p-4 rounded-[1.1rem] border-bold text-left grid content-start gap-2 hover-pop ${how === id ? 'bg-butter border-border shadow-[0_4px_0_var(--ink)]' : 'bg-surface border-border-soft'} ${off ? 'opacity-80' : ''}`}>
                         <span className="w-12 h-12 rounded-full border-std border-border grid place-items-center" style={{ background: mode ? MODE_BRIGHT[mode] : 'var(--lavender)' }}><Icon weight="bold" size={26} aria-hidden="true" /></span>
                         <span className="font-display text-lg leading-tight">{t(`activity.how.${id}`)}</span>
                         <span className="text-sm font-semibold text-muted leading-snug">{t(`activity.how.${id}Hint`)}</span>
                         {plan && <span className="absolute top-3 right-3 rounded-pill bg-[#1d1a33] text-white px-2.5 min-h-7 inline-flex items-center gap-1 text-xs font-bold"><LockSimple weight="fill" size={12} aria-hidden="true" />{plan}</span>}
-                        {!plan && needsClass(id) && <span className="absolute top-3 right-3 rounded-pill bg-surface-2 border-std border-border-soft px-2.5 min-h-7 inline-flex items-center text-xs font-bold">{t('activity.needsClass')}</span>}
+                        {!plan && !fitsHow(id) && <span className="absolute top-3 right-3 rounded-pill bg-surface-2 border-std border-border-soft px-2.5 min-h-7 inline-flex items-center text-xs font-bold">{t('activity.notThisGame')}</span>}
+                        {!plan && fitsHow(id) && needsClass(id) && <span className="absolute top-3 right-3 rounded-pill bg-surface-2 border-std border-border-soft px-2.5 min-h-7 inline-flex items-center text-xs font-bold">{t('activity.needsClass')}</span>}
                       </button>
                     );
                   })}
                 </div>
               </div>
             ))}
+            {how === 'board' && !needsClass(how) && !planFor(how) && (
+              <div role="group" aria-label={t('activity.boardPick')} className="grid gap-2">
+                <p className="font-bold m-0">{t('activity.boardPick')}</p>
+                <div className="flex flex-wrap gap-2">
+                  {GAMES.filter(ownDevice).map((g) => {
+                    const on = board.includes(g.id);
+                    return <button key={g.id} type="button" role="checkbox" aria-checked={on} disabled={!canPlayGame(tier, g.id)} onClick={() => setBoard(on ? board.filter((x) => x !== g.id) : [...board, g.id])}
+                      className={`min-h-11 pl-1 pr-3 rounded-pill border-std font-bold text-sm inline-flex items-center gap-2 disabled:opacity-40 ${on ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}><span className="w-9 h-9 rounded-full overflow-hidden border border-border" aria-hidden="true"><GameCover gameId={g.id} className="w-full h-full" /></span>{g.name}</button>;
+                  })}
+                </div>
+              </div>
+            )}
             {how && needsClass(how) && <p className="font-bold m-0" role="status">{t('activity.needsClassNote')} <button type="button" className="underline" onClick={() => goTo(0)}>{t('activity.pickClass')}</button></p>}
             {how === 'lobby' && !live && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('activity.liveOnly')}</p><UpgradeButton suggest="plus" className="min-h-10 px-3 text-sm" /></div>}
             {how === 'homework' && !lim.homework && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('activity.homeworkPro')}</p><UpgradeButton suggest="pro" className="min-h-10 px-3 text-sm" /></div>}

@@ -11,9 +11,10 @@ test('Create an activity: pick the game, how they play and the set, then get a c
   await expect(page.getByRole('radio', { name: /Anyone with the code/ })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('button', { name: 'Next' }).click();
   await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled();
-  await page.getByRole('radio', { name: /A code to play on their own/ }).click();
-  await page.getByRole('button', { name: 'Next' }).click();
+  // The game comes second (owner, 2026-11-27), then how they play.
   await page.getByRole('radio', { name: /Question Tracker/ }).click();
+  await page.getByRole('button', { name: 'Next' }).click();
+  await page.getByRole('radio', { name: /A code to play on their own/ }).click();
   await page.getByRole('button', { name: 'Next' }).click();
   await page.getByRole('searchbox', { name: 'Search titles and tags' }).fill('Animals');
   await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
@@ -42,9 +43,10 @@ test('Pro choice board: the class code opens a board of the chosen games', async
   await page.goto('/teacher/activity');
   await page.getByRole('radio', { name: /Room 9/ }).click();
   await page.getByRole('button', { name: 'Next' }).click();
-  await page.getByRole('radio', { name: /Choice board/ }).click();
+  // Pick a game first; the choice board starts with it and adds more.
+  await page.getByRole('radio', { name: /Question Tracker/ }).click();
   await page.getByRole('button', { name: 'Next' }).click();
-  await page.getByRole('checkbox', { name: /Question Tracker/ }).click();
+  await page.getByRole('radio', { name: /Choice board/ }).click();
   await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled();
   await page.getByRole('checkbox', { name: /Match Three/ }).click();
   // Two-player games join the board, played against the computer.

@@ -3174,6 +3174,7 @@ export const en = {
   'activity.group.together': 'Together in class',
   'activity.group.own': 'On their own',
   'activity.needsClass': 'Needs a class',
+  'activity.notThisGame': 'Not in this game',
   'activity.needsClassNote': 'This way uses your class list.',
   'activity.pickClass': 'Pick a class',
   'activity.how.screen': 'On the big screen',

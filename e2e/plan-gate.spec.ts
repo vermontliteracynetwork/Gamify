@@ -81,6 +81,8 @@ test('Account: Your plan starts from value and upgrades in one tap', async ({ pa
 test('Free plan: Live mode (a class lobby) is locked', async ({ page }, info) => {
   await page.goto('/teacher/activity');
   await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByRole('radio', { name: /Question Tracker/ }).click();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('radio', { name: /Open a class lobby/ }).click();
   await expect(page.getByRole('button', { name: 'Next', exact: true })).toBeDisabled();
   await expect(page.getByText('Live mode, where everyone joins a class lobby on their own device, comes with Plus and Pro.')).toBeVisible();
