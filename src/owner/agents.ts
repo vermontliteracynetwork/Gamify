@@ -66,7 +66,7 @@ export const TEAM: TeamAgent[] = [
     id: 'affiliate-advisor', name: 'Affiliate Program Chair', role: 'Runs the affiliate program (owner, 2026-11-27): research, terms, terms, language, FTC and platform rules, vetting, payouts, expectations', file: '.claude/agents/affiliate-advisor.md', color: '#f7c873',
     status: 'waiting', updated: '2026-11-25', reportsTo: CEO_ID,
     workingOn: ['Researched 20 affiliate programs (13 education or family): docs/affiliate-research.md', 'Affiliate program built: /affiliates apply page, referral links and codes, Affiliates page in the Developer Portal, payouts into Books', 'Plan and vetting checklist: docs/affiliate-program.md', 'In the CEO Agent chat: @affiliate_advisor'],
-    needsYou: [{ text: 'Pick the commission after the research (recommended: 25% of the first 12 months, never lifetime)', link: '/owner?s=affiliates' }, { text: 'Name the payout tool (you chose a tool; recommended: in-house Stripe codes for the first 10 to 20 partners, then a tool)' }],
+    needsYou: [{ text: 'Pick the commission after the research (recommended: 25% of the first 12 months, never lifetime)', link: '/owner?s=affiliates' }, { text: 'Turn on Stripe Connect for payouts once Stripe is live (you chose Stripe, 2026-11-27)' }],
   },
   {
     id: 'astrology-advisor', name: 'Astrology Advisor', role: 'Private: your natal chart and real planetary timing turned into career and money advice for Gamify', file: '.claude/agents/astrology-advisor.md', color: '#8c7ae6',

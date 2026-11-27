@@ -488,3 +488,8 @@ want in the carosel and promotional otherwise."
     room on very wide screens, and the tiny dots under the preview are now
     named buttons (Game, Team icons, Power-ups, board sizes) that jump to that
     screen. Checked at 1190x540, 1280x800, 1920x1080 and 2560x1440.
+109. [x] **Payouts through Stripe** (owner 2026-11-27: "i will use stripe"):
+    creators are tracked by their Stripe promotion code and paid to their bank
+    through Stripe Connect, which also collects W-9s and sends 1099s. The
+    affiliate page, the Chair's card and Waiting on you now say so. Waiting on
+    you: turn on Stripe Connect and the coupons once Stripe is live.

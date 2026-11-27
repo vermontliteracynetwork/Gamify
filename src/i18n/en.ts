@@ -4233,7 +4233,7 @@ export const en = {
   'affPage.d.hold': 'When you are paid',
   'affPage.d.holdV': 'On the 15th of every month, for commissions that cleared the {hold}-day refund window, once you reach ${min}. It runs on its own: smaller balances roll over, and nothing is lost if you stop.',
   'affPage.d.how': 'How you are paid',
-  'affPage.d.howV': 'PayPal or bank transfer through our partner payout tool. A W-9 is needed before your first payout.',
+  'affPage.d.howV': 'Straight to your bank account through Stripe, our payment partner. You add your tax details (W-9) once, when you set up payouts.',
   'affPage.d.offer': 'Your followers get',
   'affPage.d.offerV': '{offer} off their first term with your link or code. It does not stack with another sale.',
   'affPage.d.pro': 'For you',
