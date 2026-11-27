@@ -129,6 +129,9 @@ test('keyboard: pop-up boxes take focus, keep Tab inside, close with Escape and 
 
 test('keyboard: the first Tab shows Skip to main content, which jumps past the menu', async ({ page }) => {
   await page.goto('/features');
+  // Wait for the page to finish loading before the first Tab.
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await page.waitForLoadState('networkidle');
   await page.keyboard.press('Tab');
   const skip = page.getByRole('link', { name: 'Skip to main content' });
   await expect(skip).toBeFocused();
