@@ -1,12 +1,12 @@
 import { allowedItem } from './powerUps';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { GameManifest } from '../games/types';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import type { GameTheme, ThemeItem } from '../theme/types';
 import PowerUpPop from './PowerUpPop';
 import { roleOf } from './HeldPowerUps';
-import { amountOf, rollPowerUp } from './powerUps';
+import { amountOf, makeDealer } from './powerUps';
 
 // A question-break game's power-ups: the theme's items (Classic ones when
 // the theme has none), a roll after each right answer, and the pop that
@@ -20,9 +20,12 @@ export function usePowerUps(manifest: GameManifest, theme: GameTheme, on: boolea
   // teacher 2026-10-31), so the pop says when it will be ready.
   // `allow`: skip items that make no sense right now, like one that takes
   // points when nobody it would hit has any (teacher, 2026-11-01).
-  function grant(later = false, allow?: (it: ThemeItem) => boolean): ThemeItem | null {
+  // `who` and `everyone`: the player who answered and everyone playing, so
+  // power-ups stay even between them (owner, 2026-11-27).
+  const dealer = useRef(makeDealer());
+  function grant(later = false, allow?: (it: ThemeItem) => boolean, who?: string, everyone?: string[]): ThemeItem | null {
     if (!on) return null;
-    const it = rollPowerUp(allow ? items.filter(allow) : items);
+    const it = dealer.current.deal(allow ? items.filter(allow) : items, who, everyone);
     if (it) setPop({ id: Date.now(), item: it, text: later ? t('pu.later', { role: roleOf(manifest, it) }) : t(`pu.${manifest.id}.${it.ability}` as StringKey, { n: amount(it) }) });
     return it;
   }

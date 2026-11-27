@@ -38,6 +38,7 @@ import ThemeScreen from '../ThemeScreen';
 import { castCatchManifest } from './manifest';
 import { BoatAndRod, FishArt, LakeFloor, rodTipAt, sceneBackground, Sky, SWIMMERS } from './sceneArt';
 import { useSavedSetup } from '../useSavedSetup';
+import { makeDealer } from '../../engine/powerUps';
 import { castQuality, catchFish, catchItem, FISH, itemEffect, pointsFor, type FishKind } from './fish';
 
 
@@ -77,6 +78,7 @@ export default function CastCatch() {
   const [endsAt, setEndsAt] = useState(0);
   const [now, setNow] = useState(Date.now());
   const quality = useRef<0 | 1 | 2 | 3>(0);
+  const dealer = useRef(makeDealer());
   const doubleNext = useRef(false);
   const raf = useRef(0);
 
@@ -164,7 +166,7 @@ export default function CastCatch() {
     const times = doubleNext.current ? 2 : 1;
     // Only the power-up catches the teacher left on (2026-11-01).
     // No catch that costs points while there are none to lose (teacher, 2026-11-01).
-    const item = setup.powerUps ? catchItem((theme.items?.length ? theme.items : castCatchManifest.items!.classic).filter((it) => !(setup.powerOff ?? []).includes(it.id) && (score > 0 || (it.ability !== 'lose' && it.ability !== 'mystery')))) : null;
+    const item = setup.powerUps ? catchItem((theme.items?.length ? theme.items : castCatchManifest.items!.classic).filter((it) => !(setup.powerOff ?? []).includes(it.id) && (score > 0 || (it.ability !== 'lose' && it.ability !== 'mystery'))), Math.random, dealer.current) : null;
     let c: Catch;
     if (item) {
       const e = itemEffect(item);

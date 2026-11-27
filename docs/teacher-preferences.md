@@ -511,3 +511,10 @@ line that fits, and add each new preference the same turn she says it.
 - 2026-11-27 (owner): themes are NEVER specific to a grade: no grade or age bands, filters or labels on themes.
 - 2026-11-27 (owner): no "On this page" directory boxes on legal and similar pages.
 - 2026-11-27 (owner): affiliates: 25% for creators, only on multi-month plans; refer-a-friend gives both teachers 2 free months; payouts automated through a tool.
+- Power-ups are always fair (owner, 2026-11-27): even between players (never
+  more than one apart), even between the power-ups themselves, never the same
+  one three times in a row (we keep it to never twice), and never stacked
+  against another player (nothing that moves, hurts or takes from others).
+  No "how often" in the Theme Builder: the system sets defaults and teachers
+  switch power-ups on or off in the menus.
+- Affiliate payouts: Stripe Connect, bank transfer only is fine (owner, 2026-11-27).

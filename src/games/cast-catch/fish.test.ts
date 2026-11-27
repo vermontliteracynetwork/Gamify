@@ -24,13 +24,13 @@ describe('cast and catch', () => {
 import { catchItem, itemEffect } from './fish';
 import type { ThemeItem } from '../../theme/types';
 describe('power-up catches', () => {
-  const boot: ThemeItem = { id: 'b', name: 'Boot', ability: 'lose', amount: 100, motion: 'bob', often: 3 };
-  const rainbow: ThemeItem = { id: 'r', name: 'Rainbow fish', ability: 'points', amount: 1000, motion: 'sparkle', often: 1 };
+  const boot: ThemeItem = { id: 'b', name: 'Boot', ability: 'lose', amount: 100, motion: 'bob' };
+  const rainbow: ThemeItem = { id: 'r', name: 'Rainbow fish', ability: 'points', amount: 1000, motion: 'sparkle' };
   it('turns up on its chance, otherwise a fish', () => {
     expect(catchItem([], () => 0)).toBeNull();
     expect(catchItem([boot, rainbow], () => 0.1)?.name).toBe('Boot');
-    expect(catchItem([boot, rainbow], () => 0.21)?.name).toBe('Rainbow fish');
-    expect(catchItem([boot, rainbow], () => 0.5)).toBeNull();
+    expect(catchItem([boot, rainbow], () => 0.21)).toBeNull();
+    expect(catchItem([boot, rainbow], () => 0.19)).not.toBeNull();
   });
   it('caps every item together at 60 percent', () => {
     const many = Array.from({ length: 8 }, (_, i) => ({ ...boot, id: `b${i}` }));

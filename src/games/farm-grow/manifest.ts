@@ -26,9 +26,9 @@ export const farmGrowManifest: GameManifest = {
       { id: 'bonus', label: 'Bonus points', hint: 'Adds points to your score right away.', amount: { label: 'Points', min: 1, max: 20, step: 1, default: 5 } },
     ],
     classic: [
-      { id: 'classic-watering-can', name: 'Watering Can', ability: 'jobs', amount: 2, motion: 'bob', often: 2, art: 'watering-can' },
-      { id: 'classic-rain-cloud', name: 'Rain Cloud', ability: 'rain', motion: 'bob', often: 1, art: 'rain-cloud' },
-      { id: 'classic-prize-bag', name: 'Prize Chest', ability: 'bonus', amount: 5, motion: 'bob', often: 1, art: 'prize-bag' },
+      { id: 'classic-watering-can', name: 'Watering Can', ability: 'jobs', amount: 2, motion: 'bob', art: 'watering-can' },
+      { id: 'classic-rain-cloud', name: 'Rain Cloud', ability: 'rain', motion: 'bob', art: 'rain-cloud' },
+      { id: 'classic-prize-bag', name: 'Prize Chest', ability: 'bonus', amount: 5, motion: 'bob', art: 'prize-bag' },
     ],
   },
   rounds: { label: 'Days', min: 4, max: 10, default: 6 },

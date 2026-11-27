@@ -1,3 +1,4 @@
+import { allowedItem } from '../../engine/powerUps';
 import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { lazyPage } from '../../lib/lazyPage';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -554,16 +555,17 @@ function PieceCard({ piece, image, clear, onClearBg, onFile, onDraw, onClear }: 
 
 // Power-up items (teacher, 2026-10-26): each gets art, a name, and dropdowns
 // for what it does (only the abilities this game's code can do), how much,
-// how it moves and how often it turns up. Not every ability has to be used.
+// and how it moves. Not every ability has to be used. No "how often": every
+// power-up comes up evenly (owner, 2026-11-27), switched on or off in the game menus.
 function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; items: ThemeItem[]; onChange: (items: ThemeItem[]) => void; onProblem: (msg: string) => void }) {
   const [drawing, setDrawing] = useState<number | null>(null);
   const drawn = drawing === null ? undefined : items[drawing];
   const put = (i: number, patch: Partial<ThemeItem>) => onChange(items.map((it, j) => (j === i ? { ...it, ...patch } : it)));
   const field = fieldClasses('md', 'w-full');
   function add() {
-    const a = spec.abilities[0];
+    const a = spec.abilities.find((x) => allowedItem({ ability: x.id })) ?? spec.abilities[0];
     // New ones go first, unnamed: every power-up needs its own name.
-    onChange([{ id: newId('item'), name: '', ability: a.id, amount: a.amount?.default, motion: 'wiggle', often: 2 }, ...items]);
+    onChange([{ id: newId('item'), name: '', ability: a.id, amount: a.amount?.default, motion: 'wiggle' }, ...items]);
   }
   return (
     <div className="grid gap-3">
@@ -579,7 +581,7 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
           power-up pages (teacher, 2026-11-13), so each uploaded page lands on
           the power it was drawn for. Only names and powers: Classic art is never handed out. */}
       {items.length === 0 && (
-        <Button variant="main" className="justify-self-start" onClick={() => onChange(spec.classic.map((c) => ({ id: newId('item'), name: c.name, ability: c.ability, amount: c.amount, motion: c.motion, often: c.often })))}>
+        <Button variant="main" className="justify-self-start" onClick={() => onChange(spec.classic.filter(allowedItem).map((c) => ({ id: newId('item'), name: c.name, ability: c.ability, amount: c.amount, motion: c.motion })))}>
           <PaintBrush weight="bold" size={18} />{t('builder.items.fromTemplate', { n: spec.classic.length })}
         </Button>
       )}
@@ -600,7 +602,7 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
             </div>
             <label className="grid gap-1 font-bold text-sm">{t('builder.items.ability')}
               <select value={ability.id} onChange={(e) => { const a = spec.abilities.find((x) => x.id === e.target.value)!; put(i, { ability: a.id, amount: a.amount?.default }); }} className={field}>
-                {spec.abilities.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+                {spec.abilities.filter((a) => allowedItem({ ability: a.id })).map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
               </select>
               {/* What the power does, in full (teacher, 2026-11-01: clear and explanatory). */}
               <span className="text-sm font-semibold leading-snug">{ability.hint}{ability.amount ? ` ${t('builder.items.amountNote', { what: ability.amount.label.toLowerCase() })}` : ''}</span>
@@ -616,18 +618,11 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
                 <input type="range" min={ability.amount.min} max={ability.amount.max} step={ability.amount.step} value={it.amount ?? ability.amount.default} onChange={(e) => put(i, { amount: Number(e.target.value) })} />
               </label>
             )}
-            <div className="grid grid-cols-2 gap-2">
-              <label className="grid gap-1 font-bold text-sm">{t('builder.items.motion')}
-                <select value={it.motion} onChange={(e) => put(i, { motion: e.target.value as ThemeItem['motion'] })} className={field}>
-                  {ITEM_MOTIONS.map((m) => <option key={m} value={m}>{t(`builder.motion.${m}` as StringKey)}</option>)}
-                </select>
-              </label>
-              <label className="grid gap-1 font-bold text-sm">{t('builder.items.often')}
-                <select value={it.often} onChange={(e) => put(i, { often: Number(e.target.value) as ThemeItem['often'] })} className={field}>
-                  {([1, 2, 3] as const).map((n) => <option key={n} value={n}>{t(`builder.often.${n}` as StringKey)}</option>)}
-                </select>
-              </label>
-            </div>
+            <label className="grid gap-1 font-bold text-sm">{t('builder.items.motion')}
+              <select value={it.motion} onChange={(e) => put(i, { motion: e.target.value as ThemeItem['motion'] })} className={field}>
+                {ITEM_MOTIONS.map((m) => <option key={m} value={m}>{t(`builder.motion.${m}` as StringKey)}</option>)}
+              </select>
+            </label>
             <div className="flex flex-wrap items-center gap-2">
               {!it.image && <label className="flex items-center gap-2 font-bold text-sm">{t('builder.items.color')}<input type="color" value={it.color ?? '#fdfd94'} onChange={(e) => put(i, { color: e.target.value })} className="color-dot w-9 h-9" /></label>}
               {it.image && <Button onClick={() => put(i, { image: undefined })}>{t('builder.items.removePicture')}</Button>}

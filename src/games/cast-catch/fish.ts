@@ -1,3 +1,4 @@
+import type { Dealer } from '../../engine/powerUps';
 import type { ThemeItem } from '../../theme/types';
 
 // The fish in Cast and Catch (logic borrowed from the Dashboard's Doc
@@ -43,18 +44,16 @@ export function catchFish(quality: 0 | 1 | 2 | 3, rand: () => number = Math.rand
 
 export const pointsFor = (fish: FishKind, cm: number) => RARITY_POINTS[fish.rarity] + Math.round(cm / 5);
 
-// Power-up catches a theme adds (teacher, 2026-10-26). Each turns up on its
-// own chance (rarely 4%, sometimes 10%, often 20%; all together at most 60%),
-// otherwise the cast catches a fish as usual.
-const ITEM_CHANCE = { 1: 0.04, 2: 0.1, 3: 0.2 } as const;
-export function catchItem(items: ThemeItem[], rand: () => number = Math.random): ThemeItem | null {
+// Power-up catches a theme adds (teacher, 2026-10-26). Every item is as
+// likely as the others (owner, 2026-11-27: no "how often"): 10% a cast for
+// each one switched on, at most 60% together, otherwise a fish. With the
+// game's dealer, the same catch never comes twice in a row.
+export const itemChance = (n: number) => Math.min(0.6, 0.1 * n);
+export function catchItem(items: ThemeItem[], rand: () => number = Math.random, dealer?: Dealer): ThemeItem | null {
   if (!items.length) return null;
-  const weights = items.map((it) => ITEM_CHANCE[it.often]);
-  const total = weights.reduce((a, b) => a + b, 0);
-  const scale = total > 0.6 ? 0.6 / total : 1;
-  let r = rand(), acc = 0;
-  for (let i = 0; i < items.length; i++) { acc += weights[i] * scale; if (r < acc) return items[i]; }
-  return null;
+  if (dealer) return dealer.deal(items, undefined, undefined, itemChance(items.length));
+  if (rand() >= itemChance(items.length)) return null;
+  return items[Math.floor(rand() * items.length)] ?? null;
 }
 
 // What an item does: points (may be negative), extra seconds, or doubling the next catch.

@@ -22,8 +22,8 @@ export const gameShowManifest: GameManifest = {
       { id: 'bonus', label: 'Bonus points', hint: 'A big prize: adds points to your score right away.', amount: { label: 'Points', min: 10, max: 200, step: 10, default: 100 } },
     ],
     classic: [
-      { id: 'classic-double', name: 'Double Star', ability: 'double', motion: 'sparkle', often: 1, art: 'double-star' },
-      { id: 'classic-bonus', name: 'Prize Chest', ability: 'bonus', amount: 100, motion: 'bob', often: 1, art: 'prize-bag' },
+      { id: 'classic-double', name: 'Double Star', ability: 'double', motion: 'sparkle', art: 'double-star' },
+      { id: 'classic-bonus', name: 'Prize Chest', ability: 'bonus', amount: 100, motion: 'bob', art: 'prize-bag' },
     ],
   },
   hasCpu: true,

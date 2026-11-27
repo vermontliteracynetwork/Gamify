@@ -72,12 +72,14 @@ export function placePowers(kinds: SpaceKind[], allowed: Power[], rnd: Rnd = Mat
   while (out.size < want && tries++ < 500) {
     const i = 2 + Math.floor(rnd() * (n - 4));
     if (kinds[i] !== 'regular' || out.has(i) || out.has(i - 1) || out.has(i + 1)) continue;
-    out.set(i, allowed[out.size % allowed.length]);
+    out.set(i, allowed[0]);
   }
-  // Shuffle which power sits where, so the order along the board is random.
-  const keys = [...out.keys()];
-  const vals = [...out.values()].sort(() => rnd() - 0.5);
-  keys.forEach((k, j) => out.set(k, vals[j]));
+  // Each power as often as the others, in a shuffled order going round and
+  // round along the board, so the same one never sits twice in a row
+  // (owner, 2026-11-27).
+  const order = [...allowed];
+  for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+  [...out.keys()].sort((x, y) => x - y).forEach((k, j) => out.set(k, order[j % order.length]));
   return out;
 }
 

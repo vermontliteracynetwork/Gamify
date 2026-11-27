@@ -88,7 +88,7 @@ export default function LunchRush() {
   const powers = usePowerUps(lunchRushManifest, theme, setup.powerUps, setup.powerOff ?? []);
   const doubleTips = useRef(false);
   function earned(state: TurnState) {
-    const it = powers.grant();
+    const it = powers.grant(false, undefined, current(state).id, state.players.map((p) => p.id));
     setServes(SERVES + (it?.ability === 'serves' ? powers.amount(it) : 0));
     if (it?.ability === 'bonus') setTurns(addPoints(state, current(state).id, powers.amount(it)));
     if (it?.ability === 'double') doubleTips.current = true;

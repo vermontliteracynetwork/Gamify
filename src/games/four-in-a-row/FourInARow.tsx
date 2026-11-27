@@ -169,7 +169,7 @@ export default function FourInARow() {
       if (!live) return;
       if (!ok) { setPhase('setup'); return; }
       setRights((r) => r.map((n, i) => (i === turn ? n + 1 : n)));
-      if (remoteSeat === null) { const it = powers.grant(true); if (it) held.earn(player.id, it); }
+      if (remoteSeat === null) { const it = powers.grant(true, undefined, player.id, players.map((p) => p.id)); if (it) held.earn(player.id, it); }
       setStep('pick');
     });
     return () => { live = false; };

@@ -433,7 +433,7 @@ want in the carosel and promotional otherwise."
     theme for one game OR they can have unlimited game and theme selection
     for the students to choose from"): build the three homework modes in
     Create an Activity; marketing point: student autonomy.
-96. [ ] **Four in a Row on two devices test fails** (found 2026-11-27; it also
+96. [x] **Four in a Row on two devices test fails** (found 2026-11-27; it also
     fails on the commit before today's work, so it is older): Share a join
     code starts a local game instead of the Waiting for Your Friend screen.
     To fix next.
@@ -482,7 +482,7 @@ want in the carosel and promotional otherwise."
 107. [x] **Create an Activity: game second** (owner): who, game, how, questions,
     start; ways the picked game can't play show "Not in this game"; the
     choice board picks its games on the How step, starting with the game.
-108. [ ] **Theme Builder at big sizes** ("the shift from laptop to big screen
+108. [x] **Theme Builder at big sizes** ("the shift from laptop to big screen
     sizing ... easier to navigate. specifically the previews"): the builder
     uses the full width on big screens (up to 112rem), the preview gets more
     room on very wide screens, and the tiny dots under the preview are now
@@ -493,3 +493,17 @@ want in the carosel and promotional otherwise."
     through Stripe Connect, which also collects W-9s and sends 1099s. The
     affiliate page, the Chair's card and Waiting on you now say so. Waiting on
     you: turn on Stripe Connect and the coupons once Stripe is live.
+110. [x] **Bank-only payouts are fine** (owner 2026-11-27): no PayPal tool needed.
+111. [x] **Fair power-ups** (owner 2026-11-27: "always evenly distributed
+    between players and of the actual power ups themselves (never have a power
+    up show three times in a row), never stacked against another player. also
+    remove the frequency in the theme builder entirely"): one dealer for every
+    question-break game keeps each player within one power-up of the others
+    (a player who is behind gets the next one for sure) and deals the items
+    from a shuffled bag, never the same one twice in a row; Game Show cards
+    and Castle Quest squares hold each power-up evenly and never the same one
+    side by side; Cast and Catch items are equally likely; Tornado and Shield
+    (Castle Quest) are gone because Tornado moved other players. "How often"
+    is gone from the Theme Builder; teachers switch power-ups on or off in
+    the game menus.
+112. [ ] **Figma-guided portal pass** (85) is next.

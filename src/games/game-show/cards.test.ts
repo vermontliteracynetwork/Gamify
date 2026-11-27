@@ -35,3 +35,18 @@ describe('row and column bonus', () => {
     expect(linesFilled(cards, 3, 5)).toBe(0);
   });
 });
+
+describe('fair power-up cards (owner, 2026-11-27)', () => {
+  const items = ['a', 'b', 'c'].map((id) => ({ id, name: id, ability: 'bonus', motion: 'none' as const }));
+  it('each power-up as often as the others, never twice in a row in board order', () => {
+    for (let s = 1; s < 20; s++) {
+      let seed = s;
+      const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+      const deck = dealCards(36, rand, items);
+      const powers = deck.flatMap((c) => (c.kind === 'power' ? [c.item.id] : []));
+      for (let i = 1; i < powers.length; i++) expect(powers[i]).not.toBe(powers[i - 1]);
+      const n = ['a', 'b', 'c'].map((x) => powers.filter((v) => v === x).length);
+      expect(Math.max(...n) - Math.min(...n)).toBeLessThanOrEqual(1);
+    }
+  });
+});

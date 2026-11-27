@@ -57,7 +57,7 @@ export interface ThemePieceSpec {
 // Power-up items (teacher, 2026-10-26): things a game can make happen, like a
 // boot that takes away 100 points or a rainbow fish worth 1000. Each game
 // declares the abilities its code can do; a theme adds items with its own
-// art and picks each item's ability, amount, motion and how often it shows.
+// art and picks each item's ability, amount and motion.
 export interface AbilitySpec {
   id: string;
   label: string;
@@ -67,7 +67,8 @@ export interface AbilitySpec {
 }
 export const ITEM_MOTIONS = ['wiggle', 'bob', 'sparkle', 'spin', 'none'] as const;
 export type ItemMotion = (typeof ITEM_MOTIONS)[number];
-// How often an item turns up: 1 rarely, 2 sometimes, 3 often.
+// Old saved themes may still carry a "how often"; it is ignored now (owner,
+// 2026-11-27: every power-up comes up evenly).
 export type ItemOften = 1 | 2 | 3;
 export interface ItemSlotsSpec {
   label: string;
@@ -86,7 +87,7 @@ export interface ThemeItem {
   ability: string;
   amount?: number;
   motion: ItemMotion;
-  often: ItemOften;
+  often?: ItemOften;
   image?: string;
   color?: string;
   // Classic art drawn in code (src/theme/classicItems.tsx), used until a

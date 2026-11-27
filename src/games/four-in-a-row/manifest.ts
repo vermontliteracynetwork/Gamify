@@ -25,8 +25,8 @@ export const fourInARowManifest: GameManifest = {
       { id: 'pop', label: 'Pop out', hint: 'Pull the bottom piece out of any column; the pieces above it fall down one space.' },
     ],
     classic: [
-      { id: 'classic-double-drop', name: 'Double Drop', ability: 'double', motion: 'bob', often: 2, image: '/classic/powerups/gem.webp' },
-      { id: 'classic-pop-out', name: 'Pop Out', ability: 'pop', motion: 'wiggle', often: 2, image: '/classic/powerups/key.webp' },
+      { id: 'classic-double-drop', name: 'Double Drop', ability: 'double', motion: 'bob', image: '/classic/powerups/gem.webp' },
+      { id: 'classic-pop-out', name: 'Pop Out', ability: 'pop', motion: 'wiggle', image: '/classic/powerups/key.webp' },
     ],
   },
   hasCpu: true,

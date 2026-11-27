@@ -167,7 +167,7 @@ export default function Pinball() {
   // A collected star earns a power-up for the player's next turn (teacher, 2026-11-13).
   function starPower(state: TurnState) {
     const me = current(state).id;
-    const it = powers.grant(true, (x) => x.ability !== 'swipe' || state.players.some((p) => p.id !== me && p.score > 0));
+    const it = powers.grant(true, (x) => x.ability !== 'swipe' || state.players.some((p) => p.id !== me && p.score > 0), me, state.players.map((p) => p.id));
     if (it) held.earn(me, it);
     return it;
   }

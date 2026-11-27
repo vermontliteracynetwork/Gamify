@@ -27,9 +27,9 @@ export const lunchRushManifest: GameManifest = {
       { id: 'double', label: 'Double tips', hint: 'Every food you serve this turn earns twice the tips.' },
     ],
     classic: [
-      { id: 'classic-extra-plate', name: 'Extra Plate', ability: 'serves', amount: 1, motion: 'bob', often: 2, art: 'extra-plate' },
-      { id: 'classic-tip-jar', name: 'Tip Jar', ability: 'bonus', amount: 5, motion: 'wiggle', often: 1, art: 'tip-jar' },
-      { id: 'classic-double-star', name: 'Double Star', ability: 'double', motion: 'sparkle', often: 1, art: 'double-star' },
+      { id: 'classic-extra-plate', name: 'Extra Plate', ability: 'serves', amount: 1, motion: 'bob', art: 'extra-plate' },
+      { id: 'classic-tip-jar', name: 'Tip Jar', ability: 'bonus', amount: 5, motion: 'wiggle', art: 'tip-jar' },
+      { id: 'classic-double-star', name: 'Double Star', ability: 'double', motion: 'sparkle', art: 'double-star' },
     ],
   },
   hasCpu: true,

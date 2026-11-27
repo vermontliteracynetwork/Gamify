@@ -25,6 +25,16 @@ describe('Board Game board', () => {
     expect(p.size).toBeGreaterThan(2);
     for (const i of p.keys()) expect(k[i]).toBe('regular');
   });
+  it('spreads power-ups evenly, never the same one twice in a row', () => {
+    for (let seed = 1; seed < 20; seed++) {
+      const k = spaceKinds(60, seeded(seed));
+      const p = placePowers(k, ['double', 'x2', 'potion'], seeded(seed + 50));
+      const along = [...p.keys()].sort((a, b) => a - b).map((i) => p.get(i));
+      for (let i = 1; i < along.length; i++) expect(along[i]).not.toBe(along[i - 1]);
+      const n = ['double', 'x2', 'potion'].map((x) => along.filter((v) => v === x).length);
+      expect(Math.max(...n) - Math.min(...n)).toBeLessThanOrEqual(1);
+    }
+  });
   it('tornado spreads players evenly and never back home', () => {
     for (let s = 1; s < 30; s++) {
       const pos = [5, 5, 12, 20];

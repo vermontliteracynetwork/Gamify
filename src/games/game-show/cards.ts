@@ -25,16 +25,20 @@ export const CARD_GRIDS = [
 ];
 export const gridFor = (count: number) => CARD_GRIDS.find((g) => g.cols * g.rows === count) ?? CARD_GRIDS[0];
 
-// About one power-up per five cards; items marked "often" show up more.
+// About one power-up per five cards. Each power-up shows up as often as the
+// others, and two cards side by side never hold the same one (owner, 2026-11-27).
 export function dealCards(count: number, rand: () => number = Math.random, items: ThemeItem[] = []): CardKind[] {
-  const pool = items.flatMap((it) => Array.from({ length: it.often ?? 1 }, () => it));
-  const nPowers = pool.length ? Math.min(Math.floor(count / 3), Math.max(items.length, Math.round(count / 5))) : 0;
-  const deck: CardKind[] = [];
-  // Every item at least once, then by weight.
-  for (let i = 0; i < nPowers; i++) deck.push({ kind: 'power', item: i < items.length ? items[i] : pool[Math.floor(rand() * pool.length)] });
+  const nPowers = items.length ? Math.min(Math.floor(count / 3), Math.max(items.length, Math.round(count / 5))) : 0;
   const values = [10, 20, 30, 40, 50];
-  while (deck.length < count) deck.push({ kind: 'points', points: values[Math.floor(rand() * values.length)] });
-  for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+  const deck: CardKind[] = [];
+  for (let i = 0; i < count; i++) deck.push({ kind: 'points', points: values[Math.floor(rand() * values.length)] });
+  // Shuffle where the power cards sit, then hand them the items in a
+  // shuffled order, round and round, in board order.
+  const spots = Array.from({ length: count }, (_, i) => i);
+  for (let i = spots.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [spots[i], spots[j]] = [spots[j], spots[i]]; }
+  const order = [...items];
+  for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+  spots.slice(0, nPowers).sort((a, b) => a - b).forEach((at, k) => { deck[at] = { kind: 'power', item: order[k % order.length] }; });
   return deck;
 }
 

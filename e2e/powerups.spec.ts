@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('Theme Builder: a Game Show theme gets power-ups with art, a power, a motion and how often', async ({ page }, info) => {
+test('Theme Builder: a Game Show theme gets power-ups with art, a power and a motion', async ({ page }, info) => {
   await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
@@ -18,7 +18,8 @@ test('Theme Builder: a Game Show theme gets power-ups with art, a power, a motio
   await page.getByLabel('What it does').first().selectOption({ label: 'Bonus points' });
   await page.getByLabel(/^Points: /).first().fill('150');
   await page.getByLabel('How it moves').first().selectOption({ label: 'Sparkles' });
-  await page.getByLabel('How often').first().selectOption({ label: 'Rarely' });
+  // No "how often": every power-up comes up evenly (owner, 2026-11-27).
+  await expect(page.getByLabel('How often')).toHaveCount(0);
   const png = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d')!; x.fillStyle = '#f6a5c0'; x.fillRect(0, 0, 64, 64); return c.toDataURL('image/png').split(',')[1]; });
   await page.getByLabel('Add a picture for Lucky strike').locator('input[type=file]').setInputFiles({ name: 'strike.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') });
   await expect(page.getByText('Classic example: Prize Chest').first()).toBeVisible();
