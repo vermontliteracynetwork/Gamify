@@ -513,3 +513,16 @@ want in the carosel and promotional otherwise."
     short card. The "1 to 3 more themes" checklist no longer says "age bands"
     (themes are never for one grade). Next round: Marketing and Agent team are
     dense lists to turn into cards.
+113. [x] **Portal pass, second round**: Agent team "Needs your answer" is one
+    card per agent (its color on top, each ask with Open), laid out in
+    columns; Marketing "Needs your OK" is a grid of short post cards (platform,
+    date, hook, two lines of caption) that open the full post to decide. The
+    affiliate asks now say 25% and refer-a-friend are set; 3 decisions left.
+114. [x] **Visual and functional review** (owner 2026-11-27): 16 pages at
+    laptop, short laptop, iPad and phone: no sideways scroll, no console
+    errors. Fixed: Four in a Row power-ups (the fair dealer counted the
+    computer, so a player stopped getting them), "Up to 0 students" on Free,
+    a dead-end Beta test page (now links to apply), titles that left one
+    word alone, a chart heading read as one run-on word. Updated 9 old
+    browser tests to the current pages.
+

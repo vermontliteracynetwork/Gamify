@@ -71,7 +71,23 @@ export default function MarketingCard() {
       </div>
       <p className="text-sm font-semibold text-muted">{t('mkt.intro')}</p>
       {view === 'ok' && (waiting.length === 0 ? <p className="font-semibold">{t('mkt.okNone')}</p> : (
-        <ul className="grid gap-3 list-none p-0 m-0">{waiting.map((p) => <li key={p.id}><PostDetail post={p} decision={decisions[p.id]} onDecide={decide} /></li>)}</ul>
+        // Short cards in a grid; tap one to read it all and decide (portal pass, 2026-11-27).
+        <ul className="grid gap-3 list-none p-0 m-0 grid-cols-[repeat(auto-fill,minmax(17rem,1fr))]">{waiting.map((p) => {
+          const pf = platform(p.platform);
+          return (
+            <li key={p.id}>
+              <button type="button" onClick={() => setOpen(p)} className="w-full h-full text-left rounded-[12px] border border-[var(--dash-line)] bg-white p-3 grid content-start gap-2 hover:border-[var(--dash-purple)] motion-safe:transition-colors" style={{ borderTop: `4px solid ${pf.color}` }}>
+                <span className="flex flex-wrap items-center gap-2 text-xs font-bold">
+                  <span className="px-2 py-0.5 rounded-pill border border-border" style={{ background: pf.color }}>{pf.label}</span>
+                  <span className="text-muted">{new Date(`${p.date}T${p.time}`).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} · {t(`mkt.format.${p.format}` as StringKey)}</span>
+                </span>
+                <span className="font-bold leading-snug">{p.hook}</span>
+                {p.caption && <span className="text-sm text-muted line-clamp-2">{p.caption}</span>}
+                <span className="dash-link !px-0">{t('mkt.review')}</span>
+              </button>
+            </li>
+          );
+        })}</ul>
       ))}
       {view === 'planner' && <VisualPlanner decisions={decisions} moves={moves} connected={connected} onMove={(id, d) => void move(id, d)} onOpen={setOpen} />}
       {view === 'publishing' && <Publishing decisions={decisions} moves={moves} connected={connected} onOpen={setOpen} />}

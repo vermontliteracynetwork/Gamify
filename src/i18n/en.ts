@@ -3634,6 +3634,7 @@ export const en = {
   'mkt.tab.ideas': 'Your ideas',
   'mkt.intro': 'Everything the marketing team plans, writes and learns shows here. Nothing posts or spends until you approve it. The rules they follow: docs/marketing-bible.md.',
   'mkt.copy': 'Copy for the team',
+  'mkt.review': 'Read and decide',
   'mkt.copied': 'Copied',
   'mkt.okNone': 'Nothing is waiting for your OK.',
   'mkt.close': 'Close',

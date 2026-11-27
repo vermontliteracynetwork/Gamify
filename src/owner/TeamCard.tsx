@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Bell, Crown, MagnifyingGlass, type Icon, PaintBrush, PersonArmsSpread, Coins, SpeakerHigh, CheckSquare, Sparkle, Bank, RocketLaunch, GameController } from '@phosphor-icons/react';
+import DashEmpty from './DashEmpty';
 import { CEO_ID, TEAM, type AgentStatus, type TeamAgent } from './agents';
 
 // The Team view (teacher, 2026-11-23, from her reference picture): every
@@ -39,13 +40,25 @@ export default function TeamCard() {
     <div className="grid gap-6">
       <section className="dash-card" aria-labelledby="team-asks">
         <div className="dash-card-head"><h2 id="team-asks" className="flex items-center gap-2"><Bell weight="bold" size={18} />Needs your answer ({asks.length})</h2></div>
-        {asks.length === 0 ? <p className="text-sm text-muted">Nothing right now.</p> : (
-          <ul className="grid gap-2 list-none m-0 p-0">
-            {asks.map(({ a, n }, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm">
-                <button type="button" onClick={() => setPick(a.id)} className="shrink-0 font-bold rounded-pill px-2.5 py-0.5 border-thin" style={{ background: a.color }}>{a.name}</button>
-                <span className="flex-1">{n.text}</span>
-                {n.link && (n.link.startsWith('http') ? <a href={n.link} target="_blank" rel="noreferrer" className="font-bold shrink-0">Open</a> : <Link to={n.link} className="font-bold shrink-0">Open</Link>)}
+        {/* One card per agent, its color on the top edge (portal pass, 2026-11-27: "visual and simple views"). */}
+        {asks.length === 0 ? <DashEmpty text="Nothing right now." icon={Bell} /> : (
+          <ul className="list-none m-0 p-0 columns-[16rem] gap-3">
+            {TEAM.filter((a) => a.needsYou.length).map((a) => (
+              <li key={a.id} className="break-inside-avoid mb-3 rounded-[12px] border border-[var(--dash-line)] bg-white grid content-start gap-2 p-3" style={{ borderTop: `4px solid ${a.color}` }}>
+                <button type="button" onClick={() => setPick(a.id)} className="justify-self-start text-left font-bold text-sm flex items-center gap-2">
+                  <span className="w-7 h-7 rounded-full grid place-items-center shrink-0" style={{ background: a.color }} aria-hidden="true">{(() => { const Ic = a.id === CEO_ID ? Crown : ICONS[a.id] ?? Sparkle; return <Ic weight="fill" size={16} color="#241c3d" />; })()}</span>
+                  {a.name}
+                </button>
+                <ul className="grid gap-3 list-none m-0 p-0">
+                  {a.needsYou.map((n) => (
+                    <li key={n.text} className="text-sm leading-snug grid gap-1">
+                      <span>{n.text}</span>
+                      {n.link && (n.link.startsWith('http')
+                        ? <a href={n.link} target="_blank" rel="noreferrer" className="dash-link justify-self-start !px-0">Open</a>
+                        : <Link to={n.link} className="dash-link justify-self-start !px-0">Open</Link>)}
+                    </li>
+                  ))}
+                </ul>
               </li>
             ))}
           </ul>
