@@ -724,7 +724,7 @@ const gWord = (text: string, key: number): ReactNode => {
   return (
     <span key={key} data-gy="">
       <span className="sr-only">{text}</span>
-      <span aria-hidden="true">{parts.map((p, i) => <span key={i}>{i > 0 && <span className="logo-g" />}{p}</span>)}</span>
+      <span aria-hidden="true">{parts.map((p, i) => <span key={i}>{i > 0 ? <><span className="logo-g" /><span className="after-logo-g">{p}</span></> : p}</span>)}</span>
     </span>
   );
 };

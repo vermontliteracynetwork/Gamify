@@ -16,7 +16,7 @@ export default function Title({ text }: { text: string }) {
       <span aria-hidden="true">
         {cased.split(/(\s+)/).map((word, w) => /^[^\p{L}\p{N}]*G/u.test(word)
           // Only a G that starts a word is the logo G (teacher, 2026-11-24).
-          ? <span key={w} className="whitespace-nowrap">{word.split(/(?<=^[^\p{L}\p{N}]*)G/u).map((part, i) => <span key={i}>{i > 0 && <><span className="logo-g" /><span className="logo-g-text">G</span></>}{part}</span>)}</span>
+          ? <span key={w} className="whitespace-nowrap">{word.split(/(?<=^[^\p{L}\p{N}]*)G/u).map((part, i) => <span key={i}>{i > 0 ? <><span className="logo-g" /><span className="logo-g-text">G</span><span className="after-logo-g">{part}</span></> : part}</span>)}</span>
           : word)}
       </span>
     </>
