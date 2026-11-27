@@ -16,12 +16,9 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(
 function LegalPage({ title, intro, sections }: { title: string; intro: string; sections: { h: string; items: string[] }[] }) {
   return (
     <>
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-10 items-start">
-        <nav aria-label={t('legal.onPage')} className="bg-surface border-std border-border rounded-panel p-4 grid gap-1 lg:sticky lg:top-24 lg:row-start-1" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <h2 className="m-0 mb-1 font-heading font-bold text-lg">{t('legal.onPage')}</h2>
-          {sections.map((s) => <a key={s.h} href={`#${slug(s.h)}`} className="min-h-10 inline-flex items-center font-semibold text-text no-underline hover:underline">{s.h}</a>)}
-        </nav>
-        <article className="grid gap-6 max-w-[47.5rem] min-w-0 lg:row-start-1 lg:col-start-2">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 grid gap-6 items-start">
+        {/* No On this page box (owner, 2026-11-27: "remove the on this page directory"). */}
+        <article className="grid gap-6 max-w-[47.5rem] min-w-0">
           <div className="grid gap-2">
             <h1 className="title-bubble text-5xl"><Title text={title} /></h1>
             <p className="m-0 font-semibold text-muted">{t('legal.updated', { date: LEGAL_UPDATED })}</p>

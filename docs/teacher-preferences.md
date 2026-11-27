@@ -509,3 +509,4 @@ line that fits, and add each new preference the same turn she says it.
 - 2026-11-27 (owner): prices show stacked savings with minus lines in a bright color, the struck standard price and the total in Grow Year (people love seeing savings); no per-day line.
 - 2026-11-27 (owner): homework can be one theme for one game, a choice board of a few themes per game, or unlimited game and theme choice for students (selling point: autonomy).
 - 2026-11-27 (owner): themes are NEVER specific to a grade: no grade or age bands, filters or labels on themes.
+- 2026-11-27 (owner): no "On this page" directory boxes on legal and similar pages.
