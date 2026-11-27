@@ -202,7 +202,7 @@ landing page layouts, copy Stripe. For micro interactions, copy Framer."
     grades, tags, etc. and replace those on the current bar. it should just be
     the sets toggle, search, filters. search should be large and fill the space
     between the two"
-45. [ ] **Live link is not the approved menus.** Audited 2026-11-27 against
+45. [x] **Live link is not the approved menus.** Audited 2026-11-27 against
     /brand Universal views 1-7. Fixed on the preview branch: marbled ground,
     title row (title left, approved meter centered, Settings, Full screen,
     Report, Close right), "How do you share?" on a paper card with a checked
@@ -211,8 +211,8 @@ landing page layouts, copy Stripe. For micro interactions, copy Framer."
     a Mint tab, Options cards two side by side, Power-ups last before Play,
     step names Question set and Options, the site links on start menus. Open
     (to confirm): team names (silly name dice vs the mockup's Team Purple /
-    Sky / Pink), the Game Show cover art. Goes live when she approves the
-    push to main. "what is currently live on the
+    Sky / Pink), the Game Show cover art. Live on main 2026-11-27 (owner:
+    "push to main"). "what is currently live on the
     link is NOT the approved menus !!!!!!!!!!!!!!" Compare every live menu to
     its approved /brand mockup and fix each difference.
 46. [x] **Tell Gamify flag at the far right** of the top bar.
