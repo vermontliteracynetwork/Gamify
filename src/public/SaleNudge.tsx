@@ -2,7 +2,7 @@ import { BellRinging, Timer } from '@phosphor-icons/react';
 import { LAUNCH_OFFER } from '../config';
 import { t } from '../i18n';
 import { saleLive } from './LaunchSaleBanner';
-import { PowerSticker, paperCss } from '../brand/ScrapbookKit';
+import { PowerSticker } from '../brand/ScrapbookKit';
 
 // A small, true urgency line under sign-up buttons (owner, 2026-11-27:
 // "always promote signing up now, a slight level of urgency especially around
@@ -18,7 +18,7 @@ export default function SaleNudge({ className = '', sticky = false }: { classNam
     <div className={`relative w-64 max-w-full rotate-[3deg] ${className}`}>
       <span aria-hidden="true" className="absolute -top-3 left-1/2 -translate-x-1/2 -rotate-6 w-24 h-7 rounded-[0.25rem] bg-[#bfdff3]/80 border border-border/30" />
       <span className="absolute -bottom-5 -right-5 z-10" aria-hidden="true"><PowerSticker id="double-points" size={64} /></span>
-      <div className="p-5 pt-6 grid gap-2 border-[3px] border-border rounded-[0.6rem] text-text" style={{ ...paperCss('gingham', 4), boxShadow: '0 6px 0 var(--ink), 6px 10px 18px rgba(29,26,51,0.18)' }}>
+      <div className="p-5 pt-6 grid gap-2 border-[3px] border-border rounded-[0.6rem] text-text" style={{ background: '#fff6b8', boxShadow: '0 6px 0 var(--ink), 6px 10px 18px rgba(29,26,51,0.18)' }}>
         {sale && <>
           <span className="justify-self-start rounded-pill px-3 min-h-8 inline-flex items-center gap-1.5 text-sm font-bold text-white border-std border-border" style={{ background: '#c2185b' }}><Timer weight="bold" size={15} aria-hidden="true" />{t('nudge.days', { days })}</span>
           <p className="m-0 title-bubble text-[1.9rem] leading-[0.95]">{t('nudge.stickyTitle', { name: LAUNCH_OFFER.name, off: Math.round(LAUNCH_OFFER.discount * 100) })}</p>

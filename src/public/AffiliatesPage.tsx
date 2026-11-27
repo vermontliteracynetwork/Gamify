@@ -15,8 +15,8 @@ const card = 'bg-surface border-bold border-border rounded-panel p-5 grid gap-3 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
 
 export default function AffiliatesPage() {
-  const terms = { rate: pct(AFFILIATE.rate), months: AFFILIATE.months, school: pct(AFFILIATE.schoolRate), days: AFFILIATE.windowDays, min: AFFILIATE.minimumPayout, offer: pct(AFFILIATE.followerOffer), hold: AFFILIATE.holdDays };
-  const examples: [string, number][] = [[t('affPage.ex.plusYear'), commission('plus', 'year')], [t('affPage.ex.proYear'), commission('pro', 'year')], [t('affPage.ex.plusMonth'), commission('plus', 'month')]];
+  const terms = { rate: pct(AFFILIATE.rate), months: AFFILIATE.months, school: pct(AFFILIATE.schoolRate), days: AFFILIATE.windowDays, min: AFFILIATE.minimumPayout, offer: pct(AFFILIATE.followerOffer), hold: AFFILIATE.holdDays, friend: AFFILIATE.friendMonths };
+  const examples: [string, number][] = [[t('affPage.ex.plusYear'), commission('plus', 'year')], [t('affPage.ex.proYear'), commission('pro', 'year')], [t('affPage.ex.plusHalf'), commission('plus', 'half')], [t('affPage.ex.plusMonth'), commission('plus', 'month')]];
   return (
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-10">
@@ -58,7 +58,7 @@ export default function AffiliatesPage() {
         <section aria-labelledby="aff-details" className="grid gap-4">
           <h2 id="aff-details" className="title-bubble text-4xl"><Title text={t('affPage.detailsTitle')} /></h2>
           <dl className="grid sm:grid-cols-2 gap-3 m-0">
-            {(['rate', 'school', 'window', 'hold', 'how', 'offer', 'pro'] as const).map((k) => (
+            {(['rate', 'plans', 'school', 'window', 'hold', 'how', 'offer', 'pro'] as const).map((k) => (
               <div key={k} className={`${card} !gap-1`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <dt className="font-heading font-bold text-lg">{t(`affPage.d.${k}` as StringKey)}</dt>
                 <dd className="m-0 font-semibold">{t(`affPage.d.${k}V` as StringKey, terms)}</dd>
@@ -69,7 +69,7 @@ export default function AffiliatesPage() {
 
         <section aria-labelledby="aff-friend" className={`${card} !bg-mint`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <h2 id="aff-friend" className="font-display text-2xl"><Title text={t('affPage.friendTitle')} /></h2>
-          <p className="m-0 font-semibold">{t('affPage.friendText')}</p>
+          <p className="m-0 font-semibold">{t('affPage.friendText', terms)}</p>
         </section>
 
         <ApplyForm />

@@ -17,14 +17,21 @@ export const AFFILIATE = {
   followerOffer: 0.1,    // followers get 10% off their first term (never stacked with another sale)
   minFollowers: 1000,    // or a smaller community that is clearly engaged (a group, a newsletter)
   proWhileActive: true,  // affiliates get Pro free while they are active, and say so in posts
-  referAFriend: true,    // owner 2026-11-27: every Gamify teacher also gets a refer-a-friend link (reward to decide)
+  referAFriend: true,    // owner 2026-11-27: every Gamify teacher also gets a refer-a-friend link
+  friendMonths: 2,       // owner 2026-11-27: both the teacher who shares and the friend who joins get 2 free months
+  // owner 2026-11-27: commissions only on multi-month plans (3, 6 or 12 months); monthly plans earn nothing.
+  qualifying: ['quarter', 'half', 'year'] as const,
 };
 
-// What one paid customer earns an affiliate, for the public page and the math.
-export function commission(plan: 'plus' | 'pro' | 'homeschool', billing: 'month' | 'year'): number {
-  // On what the customer actually pays, after the follower offer on the first term (research, 2026-11-27).
-  const first = billing === 'year' ? PRICES_USD[plan].year : PRICES_USD[plan].month;
-  const paid = billing === 'year' ? first * (1 - AFFILIATE.followerOffer) : first * (1 - AFFILIATE.followerOffer) + PRICES_USD[plan].month * (AFFILIATE.months - 1);
+// What one paid customer earns an affiliate in their first 12 months, on what
+// the customer actually pays (the follower offer comes off the first term).
+// Monthly plans earn nothing (owner, 2026-11-27: multi-month plans only).
+export function commission(plan: 'plus' | 'pro' | 'homeschool', billing: 'month' | 'quarter' | 'half' | 'year'): number {
+  if (!(AFFILIATE.qualifying as readonly string[]).includes(billing)) return 0;
+  const months = billing === 'quarter' ? 3 : billing === 'half' ? 6 : 12;
+  const terms = Math.round(AFFILIATE.months / months);
+  const term = PRICES_USD[plan][billing];
+  const paid = term * (1 - AFFILIATE.followerOffer) + term * (terms - 1);
   return Math.round(paid * AFFILIATE.rate * 100) / 100;
 }
 

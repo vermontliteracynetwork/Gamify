@@ -39,28 +39,38 @@ export default function DevDock() {
   useEffect(() => { const f = () => setPos((p) => clamp(p)); f(); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   if (!owner) return null;
   const pick = (t: Tier | null) => { setPreviewTier(t); setPlan(t); };
-  const tap = () => { const now = Date.now(); if (now - lastTap.current < 400) setOpen(true); lastTap.current = now; };
+  // Closed: a double-click opens it. Open: one click on the button closes it.
+  const tap = () => { if (open) { setOpen(false); return; } const now = Date.now(); if (now - lastTap.current < 400) setOpen(true); lastTap.current = now; };
   const down = (e: RPointerEvent) => { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); drag.current = { dx: e.clientX - pos.x, dy: e.clientY - pos.y, moved: false }; };
   const move = (e: RPointerEvent) => { const d = drag.current; if (!d) return; const next = clamp({ x: e.clientX - d.dx, y: e.clientY - d.dy }); if (Math.abs(next.x - pos.x) + Math.abs(next.y - pos.y) > 3) d.moved = true; if (d.moved) setPos(next); };
-  const up = () => { const d = drag.current; drag.current = null; if (!d) return; if (d.moved) { try { localStorage.setItem(POS, JSON.stringify(pos)); } catch { /* fine */ } } else tap(); };
-  if (!open) {
-    return (
-      // No text or label on it, ever (owner, 2026-11-27); the name is for screen readers only.
-      <button type="button" onPointerDown={down} onPointerMove={move} onPointerUp={up} onKeyDown={(e) => { if (e.key === 'Enter') setOpen(true); }} aria-label="Developer menu"
-        className="no-print fixed z-[80] w-14 h-14 rounded-full border-[3px] border-[#1d1a33] grid place-items-center text-white touch-none cursor-grab active:cursor-grabbing" style={{ left: pos.x, top: pos.y, background: MAGENTA, boxShadow: '0 4px 0 #1d1a33' }}>
-        <Code weight="bold" size={26} aria-hidden="true" />
-      </button>
-    );
-  }
+  const up = (fromHeader = false) => { const d = drag.current; drag.current = null; if (!d) return; if (d.moved) { try { localStorage.setItem(POS, JSON.stringify(pos)); } catch { /* fine */ } } else if (!fromHeader) tap(); };
+  // The button always sits where it was put (owner, 2026-11-27: "i want the
+  // circle developer button icon to stay on the bottom right of the menu even
+  // when it is opened so i can click to close and use it to move. also allow me
+  // to move the card itself"). The open menu hangs above and to the left of it.
+  const button = (
+    // No text or label on it, ever (owner, 2026-11-27); the name is for screen readers only.
+    <button type="button" onPointerDown={down} onPointerMove={move} onPointerUp={() => up()} onKeyDown={(e) => { if (e.key === 'Enter') setOpen(!open); }} aria-label="Developer menu" aria-expanded={open}
+      className="no-print fixed z-[81] w-14 h-14 rounded-full border-[3px] border-[#1d1a33] grid place-items-center text-white touch-none cursor-grab active:cursor-grabbing" style={{ left: pos.x, top: pos.y, background: MAGENTA, boxShadow: '0 4px 0 #1d1a33' }}>
+      {open ? <X weight="bold" size={24} aria-hidden="true" /> : <Code weight="bold" size={26} aria-hidden="true" />}
+    </button>
+  );
+  if (!open) return button;
+  const W = Math.min(352, window.innerWidth - 32);
+  const menuLeft = Math.max(8, Math.min(window.innerWidth - W - 8, pos.x + 56 - W + 20));
+  const menuBottom = Math.max(8, window.innerHeight - pos.y - 36);
+  const menuMaxH = window.innerHeight - menuBottom - 16;
   const btn = (on: boolean) => `min-h-10 px-3 rounded-full border-2 border-[#1d1a33] font-bold text-sm ${on ? 'bg-[#1d1a33] text-white' : 'bg-white'}`;
   return (
-    <div role="dialog" aria-label="Developer menu" className={`no-print fixed z-[80] w-[min(22rem,calc(100vw-2rem))] rounded-[1.25rem] border-[3px] border-[#1d1a33] bg-white overflow-hidden`} style={{ right: 16, bottom: 16, boxShadow: '0 6px 0 #1d1a33' }}>
-      <div className="flex items-center gap-2 px-4 py-3 text-white" style={{ background: MAGENTA }}>
+    <>
+    <div role="dialog" aria-label="Developer menu" className="no-print fixed z-[80] rounded-[1.25rem] border-[3px] border-[#1d1a33] bg-white overflow-hidden flex flex-col" style={{ left: menuLeft, bottom: menuBottom, width: W, maxHeight: menuMaxH, boxShadow: '0 6px 0 #1d1a33' }}>
+      {/* Drag the card by its top bar. */}
+      <div className="flex items-center gap-2 px-4 py-3 text-white cursor-grab active:cursor-grabbing touch-none select-none shrink-0" style={{ background: MAGENTA }}
+        onPointerDown={(e) => { if ((e.target as HTMLElement).closest('button')) return; down(e); }} onPointerMove={move} onPointerUp={() => up(true)}>
         <Code weight="bold" size={20} aria-hidden="true" /><b className="flex-1">Developer menu</b>
         <button type="button" onClick={() => { const h = HOME(); setPos(h); try { localStorage.setItem(POS, JSON.stringify(h)); } catch { /* fine */ } }} className="text-xs font-bold underline">Back to corner</button>
-        <button type="button" onClick={() => setOpen(false)} aria-label="Collapse" className="w-9 h-9 rounded-full bg-white text-[#1d1a33] grid place-items-center"><X weight="bold" size={16} /></button>
       </div>
-      <div className="p-4 grid gap-4 max-h-[70vh] overflow-auto">
+      <div className="p-4 grid gap-4 overflow-auto min-h-0">
         <section className="grid gap-2">
           <b className="text-sm flex items-center gap-1.5"><Eye weight="bold" size={16} aria-hidden="true" />See every page as</b>
           <div className="flex flex-wrap gap-1.5">
@@ -89,5 +99,7 @@ export default function DevDock() {
         </section>
       </div>
     </div>
+    {button}
+    </>
   );
 }

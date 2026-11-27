@@ -468,3 +468,14 @@ want in the carosel and promotional otherwise."
     Her answers: decide pay after research; teachers with a following, every
     teacher by refer-a-friend, and "something else" (to ask); 10% for
     followers; a payout tool. Five decisions in Waiting on you.
+104. [x] **Affiliate rules** (owner 2026-11-27: "25% for creators", "must have a
+    multi month plan", "they both get 2 months free"): commission only on 3, 6
+    and 12-month plans; paid on the 15th monthly after the 30-day hold; the
+    page and examples follow; refer-a-friend card with the teacher's link in
+    Account (both get 2 months free). Waiting on you: the payout tool and the
+    Stripe coupons.
+105. [x] **Developer button stays with the menu** ("button icon to stay on the
+    bottom right of the menu ... click to close and use it to move. also allow
+    me to move the card"): the button stays put and becomes the close button;
+    the menu hangs above it; drag the button or the menu's top bar to move both.
+106. [x] **Sticky note solid light yellow.**

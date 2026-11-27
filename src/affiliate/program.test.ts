@@ -6,7 +6,9 @@ describe('affiliate program', () => {
   it('pays 25% of what the customer pays in the first year (after the follower offer)', () => {
     expect(commission('plus', 'year')).toBe(17.28);
     expect(commission('pro', 'year')).toBe(32.4);
-    expect(commission('plus', 'month')).toBe(23.8);
+    expect(commission('plus', 'half')).toBe(19.38);
+    // Monthly plans earn nothing (owner, 2026-11-27).
+    expect(commission('plus', 'month')).toBe(0);
   });
   it('cleans codes to capitals and numbers', () => {
     expect(cleanCode(' @ms.rivera_3 ')).toBe('MSRIVERA3');

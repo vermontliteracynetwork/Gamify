@@ -5,6 +5,7 @@ import { supabase } from '../data/supabase';
 import { PIN_KEY } from '../settings/pin';
 import { PlanCards } from '../billing/Upgrade';
 import { setTeacher, useTeacher } from '../auth/session';
+import { AFFILIATE, cleanCode, validCode } from '../affiliate/program';
 import { TIERS } from '../config';
 import { data } from '../data';
 import { useAsync, usePlan, useTier } from '../data/hooks';
@@ -92,6 +93,7 @@ export default function AccountPage() {
               <YouField label={t('account.you.pin')} value={you ? (you.pin ? '\u2022\u2022\u2022\u2022' : t('account.you.pinNone')) : ''} hint={t('account.you.pinHint')} />
             </dl>
           </Panel>
+          <ReferFriend username={teacher?.username ?? teacher?.name ?? ''} />
           <Panel className="grid gap-2">
             <h2 className="font-heading font-bold text-xl">{inTrial ? t('account.planTrial') : t('account.plan', { plan: t(`pricing.${tier}`) })}</h2>
             <p className="font-semibold">{(!TIERS[tier].hasClasses ? t('account.limitsFree', { students: String(TIERS[tier].studentsPerClassroom), sets: String(TIERS[tier].savedQuestionSets) }) : t('account.limits', { classes: String(TIERS[tier].classrooms), sets: String(TIERS[tier].savedQuestionSets) })).replace(/Infinity/g, t('pricing.unlimited'))}</p>
@@ -146,5 +148,26 @@ function YouField({ label, value, hint }: { label: string; value: string; hint?:
       <dd className="m-0 min-h-11 px-3 rounded-input border-std border-border-soft bg-surface-2 font-bold flex items-center break-all">{value}</dd>
       {hint && <dd className="m-0 text-xs font-semibold text-muted">{hint}</dd>}
     </div>
+  );
+}
+
+// Refer a friend (owner, 2026-11-27: "anyone who refers gets X number months
+// free added to their plan and that same amount the person uses gets"): the
+// teacher's own link with their username as the code; both get the free
+// months once the friend starts a paid plan.
+function ReferFriend({ username }: { username: string }) {
+  const [copied, setCopied] = useState(false);
+  const code = cleanCode(username);
+  if (!validCode(code)) return null;
+  const link = `${window.location.origin}/login?mode=signup&ref=${code}`;
+  return (
+    <Panel className="grid gap-2 !bg-mint">
+      <h2 className="font-heading font-bold text-xl">{t('account.refer.title', { months: AFFILIATE.friendMonths })}</h2>
+      <p className="font-semibold m-0">{t('account.refer.text', { months: AFFILIATE.friendMonths })}</p>
+      <div className="flex flex-wrap gap-2 items-center">
+        <code className="min-h-11 px-3 rounded-input border-std border-border bg-surface font-bold inline-flex items-center break-all">{link}</code>
+        <Button onClick={async () => { try { await navigator.clipboard.writeText(link); setCopied(true); } catch { setCopied(false); } }}>{copied ? t('account.refer.copied') : t('account.refer.copy')}</Button>
+      </div>
+    </Panel>
   );
 }
