@@ -8,6 +8,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide'; urgent?: boolean }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'reference-audit', kind: 'decide', added: '2026-11-27', title: 'Design reference audit: yes or no on 5 changes',
+    why: 'The design team compared Gamify with Duolingo (sign-up), Stripe (Home, Features, Pricing), Notion (dashboards), Airbnb (search) and Apple and Framer (motion). Each finding is a mockup on the Brand page; nothing live changes until you say yes.',
+    how: 'Open /brand?tab=audit and answer 1 to 5 in chat (for example "yes 1, 2, 4; no 3, 5").' },
   { id: 'affiliate-payout-tool', kind: 'setup', added: '2026-11-27', title: 'Affiliates: set up payouts in Stripe (Stripe Connect)',
     why: 'You chose Stripe for payouts (2026-11-27). Stripe has no affiliate tracker of its own, so the plan is: each creator gets a Stripe promotion code (their 10% follower code), Gamify works out 25% of what that customer pays on 3, 6 and 12-month plans, holds it 30 days, and on the 15th sends it to the creator\'s bank through Stripe Connect ($25 minimum). Stripe collects each creator\'s tax details (W-9) when they sign up for payouts and can send the 1099s. Bank transfer only (you said that is fine, 2026-11-27); Connect adds a small fee per payout.',
     how: 'Once Stripe is live: 1) turn on Stripe Connect (Express accounts) in the Stripe dashboard; 2) turn on 1099 tax forms for Connect; 3) make the coupons: 10% off the first term for followers, "2 months free" for refer-a-friend. Then say "Stripe is ready" and the payout run gets connected to the Affiliates page.' },
@@ -199,6 +202,7 @@ const VIEWS: [RegExp, string, string][] = [
   [/photo-release|photo release/i, 'Open the draft', '/owner?s=drafts'],
   [/\/owner, Affiliates|affiliates page/i, 'Open Affiliates', '/owner?s=affiliates'],
   [/Marketing|campaign/i, 'Open Marketing', '/owner?s=marketing'],
+  [/reference audit/i, 'Open the audit', '/brand?tab=audit'],
   [/\bbeta\b/i, 'Open Beta test', '/owner?s=beta'],
   [/challenge/i, 'Open Gallery review', '/owner?s=gallery'],
   [/welcome screen|sign up a test account/i, 'Open sign-up', '/login?mode=signup'],

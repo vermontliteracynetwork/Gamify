@@ -184,7 +184,7 @@ landing page layouts, copy Stripe. For micro interactions, copy Framer."
     "Copy" means study and match the quality and principles (pacing, layout,
     restraint, motion feel); we never copy their code, assets, art, wording or
     brand (legal rules in CLAUDE.md). Every review now names the reference used.
-40. [ ] **Audit against the references:** onboarding and the new sign-up welcome
+40. [x] **Audit against the references** (done 2026-11-27: five findings as mockups on /brand?tab=audit, waiting for her yes or no on each): onboarding and the new sign-up welcome
     screen against Duolingo (first win before account, one choice per screen);
     the Home, Features and Pricing layouts against Stripe; the owner and
     teacher dashboards against Notion; set and theme search/filters against
@@ -525,4 +525,11 @@ want in the carosel and promotional otherwise."
     a dead-end Beta test page (now links to apply), titles that left one
     word alone, a chart heading read as one run-on word. Updated 9 old
     browser tests to the current pages.
+115. [x] **Reference audit on /brand** (queue 40): sign-up and welcome
+    (Duolingo), Home, Features and Pricing (Stripe), dashboards (Notion),
+    search (Airbnb), motion (Apple, Framer), each with now, the change, why
+    and a before/after sketch. Fixed on the way: the welcome screen said
+    "Free: one list of 0" and "the last 1 days", and Plus "unlocks every
+    game" (Free plays every game); now Live mode leads Plus and early access
+    leads Pro.
 

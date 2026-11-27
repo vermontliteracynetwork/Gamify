@@ -25,6 +25,7 @@ import PublicPages from './PublicPages';
 import MoreScreens from './MoreScreens';
 import Coverage, { type BrandTab } from './Coverage';
 import ScrapbookDirection from './ScrapbookDirection';
+import ReferenceAudit from './ReferenceAudit';
 
 // The Brand page (preview, teacher 2026-11-23): the brand kit shown live, with
 // the real colors, type, parts, motion and every sound, so it can be approved
@@ -59,8 +60,8 @@ export default function BrandPage() {
           <h1 className="title-bubble text-4xl" style={{ color: 'var(--text)' }}><Title text="Brand Kit" /></h1>
           <p className="font-semibold text-muted">The Gamify look, motion and sound. Approved and live on the site.</p>
         </header>
-        <div><Tabs label="Brand kit" value={tab} onChange={setTab} className="mb-0" options={[{ id: 'style', label: 'Style sheet' }, { id: 'sounds', label: 'Sound board' }, { id: 'direction', label: 'New direction' }, { id: 'scrapbook', label: 'Scrapbook' }, { id: 'views', label: 'Universal views' }, { id: 'components', label: 'Game components' }, { id: 'games', label: 'Game mockups' }, { id: 'stickers', label: 'Stickers' }, { id: 'icons', label: 'Icons' }, { id: 'teacher', label: 'Teacher portal' }, { id: 'public', label: 'Public pages' }, { id: 'more', label: 'More screens' }, { id: 'approval', label: 'Approval' }]} /></div>
-        {tab === 'style' ? <StyleSheet /> : tab === 'sounds' ? <SoundBoard /> : tab === 'views' ? <UniversalViews /> : tab === 'components' ? <GameComponents /> : tab === 'games' ? <GameMockups /> : tab === 'stickers' ? <Stickers /> : tab === 'icons' ? <IconSet /> : tab === 'teacher' ? <TeacherPortal /> : tab === 'public' ? <PublicPages /> : tab === 'more' ? <MoreScreens /> : tab === 'approval' ? <Coverage onGo={go} /> : tab === 'scrapbook' ? <ScrapbookDirection /> : <NewDirection />}
+        <div><Tabs label="Brand kit" value={tab} onChange={setTab} className="mb-0" options={[{ id: 'style', label: 'Style sheet' }, { id: 'sounds', label: 'Sound board' }, { id: 'direction', label: 'New direction' }, { id: 'scrapbook', label: 'Scrapbook' }, { id: 'views', label: 'Universal views' }, { id: 'components', label: 'Game components' }, { id: 'games', label: 'Game mockups' }, { id: 'stickers', label: 'Stickers' }, { id: 'icons', label: 'Icons' }, { id: 'teacher', label: 'Teacher portal' }, { id: 'public', label: 'Public pages' }, { id: 'more', label: 'More screens' }, { id: 'approval', label: 'Approval' }, { id: 'audit', label: 'Reference audit' }]} /></div>
+        {tab === 'style' ? <StyleSheet /> : tab === 'sounds' ? <SoundBoard /> : tab === 'views' ? <UniversalViews /> : tab === 'components' ? <GameComponents /> : tab === 'games' ? <GameMockups /> : tab === 'stickers' ? <Stickers /> : tab === 'icons' ? <IconSet /> : tab === 'teacher' ? <TeacherPortal /> : tab === 'public' ? <PublicPages /> : tab === 'more' ? <MoreScreens /> : tab === 'approval' ? <Coverage onGo={go} /> : tab === 'scrapbook' ? <ScrapbookDirection /> : tab === 'audit' ? <ReferenceAudit /> : <NewDirection />}
       </main>
     </div>
   );
