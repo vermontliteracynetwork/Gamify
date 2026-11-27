@@ -15,7 +15,10 @@ import { startBots, type BotRun } from './botClass';
 // Double-click (or double-tap) the button to open; the X collapses it; drag it anywhere.
 const MAGENTA = '#f055a5';
 const PLANS: Tier[] = ['free', 'plus', 'pro', 'homeschool'];
-const POS = 'gamify:devdock-pos';
+// v2: the old saved spots could leave it stuck off screen (owner, 2026-11-27); everyone starts bottom right again.
+const POS = 'gamify:devdock-pos-v2';
+// Its home is the bottom-right corner; it always comes back inside the screen.
+const HOME = () => ({ x: window.innerWidth - 76, y: window.innerHeight - 76 });
 
 export default function DevDock() {
   const owner = useIsOwner();
@@ -28,19 +31,18 @@ export default function DevDock() {
   const [phase, setPhase] = useState('');
   const lastTap = useRef(0);
   // Drag it anywhere (owner, 2026-11-27: "allow me to move developer button around on drag"); the spot is remembered.
-  const [pos, setPos] = useState<{ x: number; y: number }>(() => { try { const v = JSON.parse(localStorage.getItem(POS) ?? 'null'); if (v && typeof v.x === 'number') return v; } catch { /* first time */ } return { x: 16, y: window.innerHeight - 72 }; });
+  const [pos, setPos] = useState<{ x: number; y: number }>(() => { try { const v = JSON.parse(localStorage.getItem(POS) ?? 'null'); if (v && typeof v.x === 'number') return v; } catch { /* first time */ } return HOME(); });
   const drag = useRef<{ dx: number; dy: number; moved: boolean } | null>(null);
   const clamp = (p: { x: number; y: number }) => ({ x: Math.max(4, Math.min(window.innerWidth - 60, p.x)), y: Math.max(4, Math.min(window.innerHeight - 60, p.y)) });
   useEffect(() => { const f = () => setPlan(previewTier()); window.addEventListener('gamify-tier', f); return () => window.removeEventListener('gamify-tier', f); }, []);
   useEffect(() => () => running?.stop(), [running]);
+  useEffect(() => { const f = () => setPos((p) => clamp(p)); f(); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   if (!owner) return null;
   const pick = (t: Tier | null) => { setPreviewTier(t); setPlan(t); };
   const tap = () => { const now = Date.now(); if (now - lastTap.current < 400) setOpen(true); lastTap.current = now; };
   const down = (e: RPointerEvent) => { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); drag.current = { dx: e.clientX - pos.x, dy: e.clientY - pos.y, moved: false }; };
   const move = (e: RPointerEvent) => { const d = drag.current; if (!d) return; const next = clamp({ x: e.clientX - d.dx, y: e.clientY - d.dy }); if (Math.abs(next.x - pos.x) + Math.abs(next.y - pos.y) > 3) d.moved = true; if (d.moved) setPos(next); };
   const up = () => { const d = drag.current; drag.current = null; if (!d) return; if (d.moved) { try { localStorage.setItem(POS, JSON.stringify(pos)); } catch { /* fine */ } } else tap(); };
-  const menuLeft = Math.max(8, Math.min(window.innerWidth - 360, pos.x));
-  const menuBottom = Math.max(8, window.innerHeight - pos.y - 56);
   if (!open) {
     return (
       // No text or label on it, ever (owner, 2026-11-27); the name is for screen readers only.
@@ -52,9 +54,10 @@ export default function DevDock() {
   }
   const btn = (on: boolean) => `min-h-10 px-3 rounded-full border-2 border-[#1d1a33] font-bold text-sm ${on ? 'bg-[#1d1a33] text-white' : 'bg-white'}`;
   return (
-    <div role="dialog" aria-label="Developer menu" className={`no-print fixed z-[80] w-[min(22rem,calc(100vw-2rem))] rounded-[1.25rem] border-[3px] border-[#1d1a33] bg-white overflow-hidden`} style={{ left: menuLeft, bottom: menuBottom, boxShadow: '0 6px 0 #1d1a33' }}>
+    <div role="dialog" aria-label="Developer menu" className={`no-print fixed z-[80] w-[min(22rem,calc(100vw-2rem))] rounded-[1.25rem] border-[3px] border-[#1d1a33] bg-white overflow-hidden`} style={{ right: 16, bottom: 16, boxShadow: '0 6px 0 #1d1a33' }}>
       <div className="flex items-center gap-2 px-4 py-3 text-white" style={{ background: MAGENTA }}>
         <Code weight="bold" size={20} aria-hidden="true" /><b className="flex-1">Developer menu</b>
+        <button type="button" onClick={() => { const h = HOME(); setPos(h); try { localStorage.setItem(POS, JSON.stringify(h)); } catch { /* fine */ } }} className="text-xs font-bold underline">Back to corner</button>
         <button type="button" onClick={() => setOpen(false)} aria-label="Collapse" className="w-9 h-9 rounded-full bg-white text-[#1d1a33] grid place-items-center"><X weight="bold" size={16} /></button>
       </div>
       <div className="p-4 grid gap-4 max-h-[70vh] overflow-auto">
