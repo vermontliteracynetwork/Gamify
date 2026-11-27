@@ -271,3 +271,9 @@ want in the carosel and promotional otherwise."
     your own (Pro); report history 24 hours; new Privacy and data section
     (fresh lobby code every plan, Account data, No ads, ever); no pricing rows.
     Built; to check.
+57. [ ] **Pricing and Features scan at a glance** (owner: "easy to visually
+    scan so dont be too heavy on text and use expand/collapse carrots, lots of
+    professional spacing, and easy visuals"): compare chart topics fold with
+    carets and an Open all button, row meanings moved into (i) tips, the
+    always-free list folds, fair-play reasons fold, More boxes get carets,
+    wider section spacing, shorter intro lines. Built; to check.

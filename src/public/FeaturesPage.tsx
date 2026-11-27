@@ -1,7 +1,7 @@
 import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ArrowRight, ChalkboardTeacher, ChartBar, Check, FileText, Leaf, Lock, PaintBrush, SortAscending, SpeakerHigh, Star, TextAa, X, type Icon } from '@phosphor-icons/react';
+import { ArrowRight, CaretDown, ChalkboardTeacher, ChartBar, Check, FileText, Leaf, Lock, PaintBrush, SortAscending, SpeakerHigh, Star, TextAa, X, type Icon } from '@phosphor-icons/react';
 import PlanFeatures from '../billing/PlanFeatures';
 import type { PlayMode } from '../data/types';
 import { speak } from '../engine/feedback';
@@ -38,6 +38,8 @@ import { useScrapbookGround } from './scrapbook/Shell';
 // brings its own cream ground so it sits cleanly on that shell.
 
 const card = 'bg-white border-bold border-border rounded-panel';
+// The caret on every fold, turning when it opens (owner, 2026-11-27).
+const Caret = () => <span className="w-9 h-9 rounded-full border-std border-border bg-surface grid place-items-center shrink-0"><CaretDown weight="bold" size={18} className="motion-safe:transition-transform group-open:rotate-180" aria-hidden="true" /></span>;
 const lift: CSSProperties = { boxShadow: '0 5px 0 var(--ink)' };
 const JUMPS = ['games', 'learning', 'themes', 'play', 'view', 'fair'] as const;
 const MORE: { key: string; items: number }[] = [
@@ -50,7 +52,7 @@ export default function FeaturesPage() {
   const enter = { initial: reduce ? false : { opacity: 0, y: 18 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, amount: 0.15 } } as const;
   return (
     <div>
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-4 grid gap-16">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-4 grid gap-20 sm:gap-24">
         <section className="grid gap-5" aria-labelledby="features-title">
           <h1 id="features-title" className="title-bubble text-5xl sm:text-6xl"><Title text={t('features.title')} /></h1>
           <p className="text-xl font-bold">{t('features.sub')}</p>
@@ -88,6 +90,9 @@ export default function FeaturesPage() {
           </div>
         </motion.section>
 
+        {/* Made by your class: the theme story in pictures, right after the themes (owner, 2026-11-27). */}
+        <ThemeGallery />
+
         <motion.section id="play" {...enter} aria-labelledby="play-title" className="grid gap-5 scroll-mt-24">
           <h2 id="play-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.play.title')} /></h2>
           <p className="text-lg font-semibold">{t('features.play.text')}</p>
@@ -109,10 +114,7 @@ export default function FeaturesPage() {
           </ul>
         </motion.section>
 
-        {/* Made by your class: the theme story in pictures (owner, 2026-11-27). */}
-        <ThemeGallery />
-
-        {/* Fair play, built in (teacher, 2026-11-24: "add the no stealing as a selling
+                {/* Fair play, built in (teacher, 2026-11-24: "add the no stealing as a selling
             point ... psychology first marketing"). Each line answers a weak spot the
             research found on other classroom game sites (docs/marketing-bible.md,
             the edge list); never names another site. */}
@@ -121,9 +123,12 @@ export default function FeaturesPage() {
           <p className="text-lg font-semibold">{t('features.fair.text')}</p>
           <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none p-0 m-0">
             {[1, 2, 3, 4, 5, 6].map((n) => (
-              <li key={n} className={`${card} p-5 grid gap-2 content-start`} style={lift}>
-                <span className="flex items-center gap-3"><Dot bg="var(--color-mint)" size="2.5rem"><Check weight="bold" size={20} aria-hidden="true" /></Dot><b className="font-heading text-lg leading-snug">{t(`features.fair.${n}` as StringKey)}</b></span>
-                <span className="font-semibold">{t(`features.fair.${n}.why` as StringKey)}</span>
+              <li key={n} className={`${card} p-0`} style={lift}>
+                {/* The title scans; the reason opens under the caret (owner, 2026-11-27). */}
+                <details className="group p-5">
+                  <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden flex items-center gap-3"><Dot bg="var(--color-mint)" size="2.5rem"><Check weight="bold" size={20} aria-hidden="true" /></Dot><b className="font-heading text-lg leading-snug flex-1">{t(`features.fair.${n}` as StringKey)}</b><Caret /></summary>
+                  <p className="font-semibold mt-3 mb-0">{t(`features.fair.${n}.why` as StringKey)}</p>
+                </details>
               </li>
             ))}
           </ul>
@@ -136,8 +141,8 @@ export default function FeaturesPage() {
           {/* Each box opens on its own; its neighbor keeps its size (teacher, 2026-10-31). */}
           <div className="grid sm:grid-cols-2 gap-3 items-start">
             {MORE.map((g) => (
-              <details key={g.key} className={`${card} p-4`}>
-                <summary className="font-heading font-bold text-xl cursor-pointer min-h-8">{t(`features.${g.key}` as StringKey)}</summary>
+              <details key={g.key} className={`${card} group p-4 sm:p-5`}>
+                <summary className="font-heading font-bold text-xl cursor-pointer min-h-10 list-none [&::-webkit-details-marker]:hidden flex items-center gap-3"><span className="flex-1">{t(`features.${g.key}` as StringKey)}</span><Caret /></summary>
                 <ul className="grid gap-2 list-none p-0 mt-3 mb-0">
                   {Array.from({ length: g.items }, (_, i) => <li key={i} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`features.${g.key}.${i + 1}` as StringKey)}</li>)}
                 </ul>

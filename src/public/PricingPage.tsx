@@ -2,7 +2,7 @@ import { useEffect, useState, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { ArrowDown, ArrowRight, Buildings, House, Check } from '@phosphor-icons/react';
+import { ArrowDown, ArrowRight, Buildings, CaretDown, House, Check } from '@phosphor-icons/react';
 import { BILLINGS, PRICES_USD, SCHOOL_MIN_SEATS, billingMonths, billingSavings, type Billing, type Tier } from '../config';
 import { data, newId } from '../data';
 import { t } from '../i18n';
@@ -46,7 +46,7 @@ export default function PricingPage() {
 
   return (
     <ScrapbookPage strength="A">
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-8 sm:gap-10">
         {/* The mockup's order: title, the line, the sale, the billing switch, the promises, the plans. */}
         <div>
           <h1 className="title-bubble mb-4"><Title text={t('pricing.title')} /></h1>
@@ -95,13 +95,17 @@ export default function PricingPage() {
         <SchoolPlans />
 
         {/* What is never behind a paywall, in public (teacher research, 2026-10-31). */}
-        <section aria-labelledby="always-free" className={`${CARD} p-6 grid gap-3`}>
-          <h2 id="always-free" className="font-display text-2xl leading-tight"><Title text={t('pricing.always.title')} /></h2>
-          <p className="font-semibold">{t('pricing.always.text')}</p>
-          <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2.5 list-none p-0 m-0">
+        {/* What is never behind a paywall, in public (teacher research, 2026-10-31); folded so the page scans (owner, 2026-11-27). */}
+        <details className={`${CARD} group p-5 sm:p-6`}>
+          <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden flex items-center gap-4">
+            <span className="w-12 h-12 rounded-full bg-mint border-std border-border grid place-items-center shrink-0" aria-hidden="true"><Check weight="bold" size={24} /></span>
+            <span className="grid flex-1 min-w-0"><span id="always-free" className="font-display text-2xl leading-tight"><Title text={t('pricing.always.title')} /></span><span className="font-semibold">{t('pricing.always.text')}</span></span>
+            <span className="w-9 h-9 rounded-full border-std border-border bg-surface grid place-items-center shrink-0"><CaretDown weight="bold" size={18} className="motion-safe:transition-transform group-open:rotate-180" aria-hidden="true" /></span>
+          </summary>
+          <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2.5 list-none p-0 mt-5 mb-0">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => <li key={n} className="flex gap-2.5 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5 text-kelly" aria-hidden="true" />{t(`pricing.always.${n}` as StringKey)}</li>)}
           </ul>
-        </section>
+        </details>
 
         <section aria-labelledby="faq" className="grid gap-3">
           {/* "Good to Know" with a way to Help (teacher, 2026-11-24: never "questions teachers ask"). */}
