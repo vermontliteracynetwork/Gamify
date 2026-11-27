@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import ProductionLine from './ProductionLine';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ListChecks, ArrowRight, ChartLineUp, ChatCircleDots, CreditCard, Crown, CurrencyDollar, Eye, Factory, GameController, Handshake, Megaphone, MoonStars, Notebook, PaintBrush, SquaresFour, Robot, Star, Ticket, UsersThree } from '@phosphor-icons/react';
+import { ListChecks, ChartLineUp, ChatCircleDots, CreditCard, Crown, CurrencyDollar, Eye, Factory, GameController, Handshake, Megaphone, MoonStars, Notebook, PaintBrush, SquaresFour, Robot, Star, Ticket, UsersThree } from '@phosphor-icons/react';
 import { data } from '../data';
 import { useAsync } from '../data/hooks';
 import type { FeedbackReport } from '../data/types';
@@ -22,10 +22,9 @@ import { listCheckIns, listSurveys, recommendScore } from '../beta/surveys';
 import { useTier } from '../data/hooks';
 import { growthTips } from './growth';
 import { WAITING } from './waiting';
-import { TEAM } from './agents';
+import HomeCards from './HomeCards';
+import { HOME } from './homeCopy';
 
-// The public launch target (teacher, 2026-11-23: Monday 2026-11-30).
-const LAUNCH_DAY = '2026-11-30';
 import OwnerGate from './OwnerGate';
 import TeamCard from './TeamCard';
 import { GrowthChartCard } from './GrowthChart';
@@ -63,26 +62,32 @@ export default function OwnerPage(_props: { view?: 'line' } = {}) {
 }
 
 type SectionId = 'overview' | 'ceo' | 'team' | 'release' | 'forecast' | 'stripe' | 'waiting' | 'feedback' | 'subs' | 'growth' | 'usage' | 'income' | 'books' | 'access' | 'preview' | 'gallery' | 'beta' | 'marketing' | 'astro' | 'affiliates';
-const SECTIONS: { id: SectionId; label: StringKey; icon: typeof Star }[] = [
-  { id: 'overview', label: 'owner.dashboard', icon: SquaresFour },
-  { id: 'ceo', label: 'owner.ceo', icon: Crown },
-  { id: 'team', label: 'owner.team', icon: Robot },
-  { id: 'release', label: 'owner.release', icon: Factory },
-  { id: 'forecast', label: 'owner.forecast', icon: CurrencyDollar },
-  { id: 'stripe', label: 'owner.stripe', icon: CreditCard },
-  { id: 'waiting', label: 'owner.waiting', icon: ListChecks },
-  { id: 'marketing', label: 'owner.marketing', icon: Megaphone },
-  { id: 'affiliates', label: 'owner.affiliates', icon: Handshake },
-  { id: 'feedback', label: 'owner.feedback', icon: ChatCircleDots },
-  { id: 'subs', label: 'owner.subs', icon: CreditCard },
-  { id: 'growth', label: 'owner.chart', icon: ChartLineUp },
-  { id: 'usage', label: 'owner.usage', icon: GameController },
-  { id: 'books', label: 'owner.books', icon: Notebook },
-  { id: 'access', label: 'owner.access', icon: Ticket },
-  { id: 'preview', label: 'owner.preview', icon: Eye },
-  { id: 'gallery', label: 'owner.gallery', icon: PaintBrush },
-  { id: 'beta', label: 'owner.beta', icon: UsersThree },
-  { id: 'astro', label: 'owner.astro', icon: MoonStars },
+const SECTIONS: { id: SectionId; label: StringKey; icon: typeof Star; group: NavGroup }[] = [
+  { id: 'overview', label: 'owner.dashboard', icon: SquaresFour, group: 'home' },
+  { id: 'waiting', label: 'owner.waiting', icon: ListChecks, group: 'today' },
+  { id: 'feedback', label: 'owner.feedback', icon: ChatCircleDots, group: 'today' },
+  { id: 'release', label: 'owner.release', icon: Factory, group: 'today' },
+  { id: 'subs', label: 'owner.subs', icon: CreditCard, group: 'money' },
+  { id: 'forecast', label: 'owner.forecast', icon: CurrencyDollar, group: 'money' },
+  { id: 'stripe', label: 'owner.stripe', icon: CreditCard, group: 'money' },
+  { id: 'growth', label: 'owner.chart', icon: ChartLineUp, group: 'money' },
+  { id: 'usage', label: 'owner.usage', icon: GameController, group: 'money' },
+  { id: 'books', label: 'owner.books', icon: Notebook, group: 'money' },
+  { id: 'ceo', label: 'owner.ceo', icon: Crown, group: 'team' },
+  { id: 'team', label: 'owner.team', icon: Robot, group: 'team' },
+  { id: 'marketing', label: 'owner.marketing', icon: Megaphone, group: 'team' },
+  { id: 'affiliates', label: 'owner.affiliates', icon: Handshake, group: 'team' },
+  { id: 'gallery', label: 'owner.gallery', icon: PaintBrush, group: 'team' },
+  { id: 'beta', label: 'owner.beta', icon: UsersThree, group: 'team' },
+  { id: 'access', label: 'owner.access', icon: Ticket, group: 'tools' },
+  { id: 'preview', label: 'owner.preview', icon: Eye, group: 'tools' },
+  { id: 'astro', label: 'owner.astro', icon: MoonStars, group: 'tools' },
+];
+// The side menu in the same four groups as the home cards (chunking: a
+// short labelled list is found faster than one long one).
+type NavGroup = 'home' | 'today' | 'money' | 'team' | 'tools';
+const NAV_GROUPS: { id: NavGroup; title: string }[] = [
+  { id: 'home', title: '' }, { id: 'today', title: HOME.groupNow }, { id: 'money', title: HOME.groupMoney }, { id: 'team', title: HOME.groupPeople }, { id: 'tools', title: HOME.groupTools },
 ];
 
 // The developer dashboard (teacher, 2026-11-13: "simple, clean lines,
@@ -96,7 +101,7 @@ function Desktop() {
   const owner = useOwnerStats();
   const current = SECTIONS.find((x) => x.id === section)!;
   const body: Record<SectionId, ReactNode> = {
-    overview: <div className="grid gap-6"><ProductionLine section="overview" go={(x) => go(x as SectionId)} /><Overview owner={owner} go={go} /></div>,
+    overview: <HomeCards owner={owner} go={(x) => go(x as SectionId)} />,
     ceo: <CeoCard />,
     team: <TeamCard />,
     release: <ProductionLine section="release" />,
@@ -122,17 +127,21 @@ function Desktop() {
     <main className="dev-dash">
       <nav aria-label={t('owner.sections')} className="dash-side">
         <p className="dash-brand">{t('owner.title')}</p>
-        <ul className="dash-nav">
-          {SECTIONS.map(({ id, label, icon: Icon }) => (
-            <li key={id}>
-              <button type="button" aria-current={section === id ? 'page' : undefined} onClick={() => go(id)} className="dash-nav-item">
-                <Icon size={18} aria-hidden="true" /><span>{t(label)}</span>
-              </button>
-            </li>
-          ))}
-          <li className="dash-nav-sep" aria-hidden="true" />
-          <li><Link to="/owner/themes" className={linkCls}><PaintBrush size={18} aria-hidden="true" /><span>{t('owner.themes')}</span></Link></li>
-        </ul>
+        {NAV_GROUPS.map((g) => (
+          <div key={g.id} className="dash-nav-group" role={g.title ? 'group' : undefined} aria-label={g.title || undefined}>
+            {g.title && <p className="dash-nav-title" aria-hidden="true">{g.title}</p>}
+            <ul className="dash-nav">
+              {SECTIONS.filter((x) => x.group === g.id).map(({ id, label, icon: Icon }) => (
+                <li key={id}>
+                  <button type="button" aria-current={section === id ? 'page' : undefined} onClick={() => go(id)} className="dash-nav-item">
+                    <Icon size={18} aria-hidden="true" /><span>{t(label)}</span>
+                  </button>
+                </li>
+              ))}
+              {g.id === 'tools' && <li><Link to="/owner/themes" className={linkCls}><PaintBrush size={18} aria-hidden="true" /><span>{t('owner.themes')}</span></Link></li>}
+            </ul>
+          </div>
+        ))}
       </nav>
       <section className="dash-main" aria-labelledby="dash-title">
         <header className="dash-head">
@@ -142,83 +151,6 @@ function Desktop() {
         <div className={section === 'overview' || section === 'release' || section === 'forecast' || section === 'stripe' ? 'dash-body' : 'dash-body dash-panel'}>{body[section]}</div>
       </section>
     </main>
-  );
-}
-
-const PAID_TIERS = ['homeschool', 'plus', 'pro', 'school'] as const;
-
-// One screen: four numbers, the growth chart, the top of Waiting on you and
-// the newest reports, each with a link to its full section.
-function Overview({ owner, go }: { owner: ReturnType<typeof useOwnerStats>; go: (id: SectionId) => void }) {
-  const { value: done = [] } = useAsync(() => data.getSetting<string[]>('owner-waiting-done').then((v) => v ?? []));
-  const { value: reports = [] } = useAsync(() => data.listFeedback());
-  const { value: meta = {} } = useAsync(() => data.getSetting<Record<string, FeedbackMeta>>('feedback-meta').then((v) => v ?? {}));
-  const { value: log = [] } = useAsync(() => data.listQuestionLog());
-  const chartH = useChartHeight();
-  const open = WAITING.filter((w) => !done.includes(w.id));
-  const fresh = reports.filter((r) => (meta[r.id]?.status ?? 'new') === 'new');
-  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
-  const paying = owner.stats ? PAID_TIERS.reduce((n, k) => n + (owner.stats!.tiers[k] ?? 0), 0) : null;
-  // The approved owner desktop (teacher, 2026-11-24: "add owner desktop to my
-  // developer view"): teachers, answers this week, paid plans, days to launch;
-  // Waiting on you with its count, and the agent team beside it.
-  const days = Math.max(0, Math.ceil((new Date(`${LAUNCH_DAY}T00:00:00`).getTime() - Date.now()) / 86400000));
-  const kpis: { label: string; value: string | number; to: SectionId }[] = [
-    { label: t('owner.teacherCount'), value: owner.stats?.teachers ?? '–', to: 'subs' },
-    { label: t('owner.kpiAnswersWeek'), value: log.filter((e) => e.at >= weekAgo).length, to: 'usage' },
-    { label: t('owner.kpiPaying'), value: paying ?? '–', to: 'subs' },
-    { label: t('owner.kpiLaunch'), value: days, to: 'release' },
-  ];
-  return (
-    <div className="dash-overview">
-      <ul className="dash-kpis">
-        {kpis.map((k) => (
-          <li key={k.label}><button type="button" className="dash-card dash-kpi" onClick={() => go(k.to)}><span className="dash-kpi-label">{k.label}</span><span className="dash-kpi-value">{k.value}</span></button></li>
-        ))}
-      </ul>
-      <div className="dash-grid">
-        <section className="dash-card dash-chart" aria-labelledby="ov-chart">
-          <DashHead id="ov-chart" title={t('owner.chart')} more={() => go('growth')} />
-          <GrowthChartCard {...owner} height={chartH} />
-        </section>
-        <section className="dash-card" aria-labelledby="ov-wait">
-          <DashHead id="ov-wait" title={`${t('owner.waiting')} (${open.length})`} more={() => go('waiting')} />
-          {open.length === 0 ? <p className="dash-empty">{t('owner.waitingNone')}</p> : (
-            <ol className="dash-list">
-              {open.slice(0, 4).map((w) => <li key={w.id}><span className="dash-dot" aria-hidden="true" />{w.title}</li>)}
-            </ol>
-          )}
-          {open.length > 4 && <p className="dash-more-note">{t('owner.andMore', { count: open.length - 4 })}</p>}
-        </section>
-        <section className="dash-card" aria-labelledby="ov-team">
-          <DashHead id="ov-team" title={t('owner.team')} more={() => go('team')} />
-          <ul className="dash-list">
-            {TEAM.filter((m) => m.status !== 'planned').slice(0, 6).map((m) => (
-              <li key={m.id} className="dash-report"><span className="dash-tag">{m.name}</span><span>{m.needsYou[0]?.text ?? m.workingOn[0] ?? m.role}</span></li>
-            ))}
-          </ul>
-          {fresh.length > 0 && <button type="button" onClick={() => go('feedback')} className="dash-link self-start">{t('owner.kpiNewReports')}: {fresh.length}<ArrowRight size={14} aria-hidden="true" /></button>}
-        </section>
-      </div>
-    </div>
-  );
-}
-
-// The two overview charts share whatever height the screen has left, so a
-// big monitor shows big charts and a laptop still fits on one screen.
-function useChartHeight(): number {
-  const calc = () => Math.round(Math.min(240, Math.max(110, (window.innerHeight - 560) / 2)));
-  const [h, setH] = useState(calc);
-  useEffect(() => { const on = () => setH(calc()); window.addEventListener('resize', on); return () => window.removeEventListener('resize', on); }, []);
-  return h;
-}
-
-function DashHead({ id, title, more }: { id: string; title: string; more: () => void }) {
-  return (
-    <div className="dash-card-head">
-      <h2 id={id}>{title}</h2>
-      <button type="button" onClick={more} className="dash-link">{t('owner.seeAll')}<ArrowRight size={14} aria-hidden="true" /></button>
-    </div>
   );
 }
 
