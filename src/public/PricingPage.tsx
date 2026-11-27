@@ -42,7 +42,6 @@ export default function PricingPage() {
   // "Compare every feature" glides down to the chart.
   const toChart = (e: MouseEvent) => { e.preventDefault(); document.getElementById('compare')?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); history.replaceState(null, '', '#compare'); };
   const enter = (i: number) => ({ initial: reduce ? false : { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { delay: reduce ? 0 : i * 0.06 } });
-  const trust = [t('pricing.trust.card'), t('pricing.trust.cancel'), t('pricing.trust.access')];
 
   return (
     <ScrapbookPage strength="A">
@@ -56,9 +55,6 @@ export default function PricingPage() {
         <LaunchSaleBanner />
         <Tabs value={billing} onChange={setBilling} label={t('pricing.billing')} className="justify-self-start mb-0"
           options={BILLINGS.map((b) => ({ id: b.id, label: b.id === 'month' ? t('pricing.billing.month') : t(`pricing.billing.${b.id}` as StringKey, { off: billingSavings('plus', b.id) }) }))} />
-        <ul className="flex flex-wrap gap-3 list-none p-0 m-0 max-sm:grid">
-          {trust.map((text) => <li key={text} className="inline-flex items-center gap-2 bg-white border-std border-border rounded-pill px-4 min-h-11 font-bold"><Check weight="bold" size={18} className="text-kelly shrink-0" aria-hidden="true" />{text}</li>)}
-        </ul>
         <div className="grid md:grid-cols-3 gap-5 items-stretch pt-2">
           {tiers.map((x, i) => {
             return (

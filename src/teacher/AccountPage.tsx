@@ -78,7 +78,7 @@ export default function AccountPage() {
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
-      <PageHeader title={t('account.title')} subtitle={teacher?.name} />
+      <PageHeader title={t('account.title')} />
       {beta && <Tabs label={t('account.title')} value={tab} onChange={setTab} options={[{ id: 'account', label: t('account.tab.account') }, { id: 'beta', label: t('account.tab.beta') }]} />}
       {beta && tab === 'beta' ? <BetaTab s={beta} /> : (
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] items-start">

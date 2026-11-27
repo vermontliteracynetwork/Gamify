@@ -31,7 +31,7 @@ export default function ImportPage() {
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav startOpen={false} />
-      <PageHeader title={t('import.title')} subtitle={t('import.subtitleShort')}
+      <PageHeader title={t('import.title')}
         actions={<a href={sampleHref} download="gamify-sample-questions.csv" className={buttonClasses()}><DownloadSimple weight="bold" size={18} />{t('import.sample')}</a>} />
 
       <div className="grid gap-4 md:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] items-start">

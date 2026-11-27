@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import confetti from 'canvas-confetti';
 import { Check, Sparkle } from '@phosphor-icons/react';
 import { LAUNCH_OFFER, PRICES_USD_PER_YEAR, perMonthUSD } from '../config';
-import { usePlan, useTier } from '../data/hooks';
+import { usePlan, useTierLoaded } from '../data/hooks';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { useSettings } from '../settings/SettingsContext';
@@ -95,18 +95,24 @@ export function UpgradeHost() {
   return suggest ? <UpgradeDialog suggest={suggest} onClose={() => setSuggest(null)} /> : null;
 }
 
+// Only on Free (owner, 2026-11-27: "for plans that are already upgraded, dont
+// show upgrade banenrs"), and never while the plan is still loading.
 export function UpgradeButton({ suggest = 'plus', className = '', label }: { suggest?: Plan; className?: string; label?: string }) {
-  const tier = useTier();
-  if (tier === 'pro') return null;
+  const tier = useTierLoaded();
+  if (tier !== 'free') return null;
   return (
-    <button type="button" onClick={() => openUpgrade(tier === 'plus' ? 'pro' : suggest)} className={buttonClasses('main', `hover-pop ${className}`)} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+    <button type="button" onClick={() => openUpgrade(suggest)} className={buttonClasses('main', `hover-pop ${className}`)} style={{ boxShadow: 'var(--shadow-sticker)' }}>
       <Sparkle weight="fill" size={18} aria-hidden="true" />{label ?? t('upgrade.button')}
     </button>
   );
 }
 
 // A plan limit note with the Upgrade button right beside it.
+// On a paid plan the limit still shows, as a plain line with no upgrade.
 export function LimitNote({ children, suggest = 'plus', className = '' }: { children: ReactNode; suggest?: Plan; className?: string }) {
+  const tier = useTierLoaded();
+  if (tier === null) return null;
+  if (tier !== 'free') return <p className={`font-bold text-sm text-muted ${className}`}>{children}</p>;
   return (
     <Panel className={`bg-surface-2 flex flex-wrap items-center gap-3 ${className}`}>
       <p className="font-bold flex-1 min-w-48">{children}</p>

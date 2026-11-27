@@ -277,3 +277,18 @@ want in the carosel and promotional otherwise."
     carets and an Open all button, row meanings moved into (i) tips, the
     always-free list folds, fair-play reasons fold, More boxes get carets,
     wider section spacing, shorter intro lines. Built; to check.
+58. [ ] **No subtext under teacher page titles** (owner: remove "All 8 games.
+    Pick one to start an activity, or see how it plays" "and all other subtext
+    in that format from the teacher section. including the username on the
+    account page"). Built: PageHeader no longer takes a subtitle.
+59. [ ] **No upgrade banners on upgraded plans** ("for plans that are already
+    upgraded, dont show upgrade banenrs"). Built: Upgrade buttons show on Free
+    only; limit notes on paid plans are a plain line; nothing shows while the
+    plan loads.
+60. [ ] **Fair play becomes "Every Game Comes Loaded"** ("combine with other
+    great features and have something more visual ... in a better format"):
+    a bento of the Classic power-ups, a classroom photo slot (drawn stand-in
+    until a released beta photo), the shared game pieces, and the six
+    fair-play promises as icon badges. Built; to check.
+61. [x] **Pricing promise chips removed** (No card needed, Cancel any time,
+    Accessibility free): "remove."

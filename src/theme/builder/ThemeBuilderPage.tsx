@@ -79,7 +79,7 @@ function GamePicker({ owner, base }: { owner: boolean; base: string }) {
   const view = !owner && params.get('view') === 'public' ? 'public' : 'make';
   return (
     <>
-      <PageHeader title={owner ? t('builder.ownerTitle') : t('builder.title')} subtitle={owner ? t('builder.ownerSubtitle') : t('builder.subtitle')} />
+      <PageHeader title={owner ? t('builder.ownerTitle') : t('builder.title')} />
       {!owner && <Tabs label={t('teacherNav.themes')} value={view} onChange={(v) => setParams(v === 'public' ? { view: 'public' } : {}, { replace: true })}
         options={[{ id: 'make', label: t('builder.tab.make') }, { id: 'public', label: t('builder.tab.public') }]} />}
       {view === 'public' ? <ThemeGallery signedIn /> : <>

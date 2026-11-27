@@ -67,7 +67,7 @@ export default function AchievementsPage() {
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav startOpen={false} />
-      <PageHeader title={t('ach.title')} subtitle={t('ach.sub')}
+      <PageHeader title={t('ach.title')}
         actions={<Button variant="main" onClick={bigScreen}><Broadcast weight="bold" size={18} />{t('ach.bigScreen')}</Button>} />
       {progress && earned === 0 && (
         <div className="rounded-card p-5 mb-4 flex flex-wrap items-center gap-4 border-[2.5px] border-dashed border-muted bg-surface/60">

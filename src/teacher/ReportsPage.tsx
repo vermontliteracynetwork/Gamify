@@ -120,7 +120,7 @@ export default function ReportsPage() {
     return (
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">
         <TeacherNav />
-        <PageHeader title={t('reports.title')} subtitle={t('reports.freeSub')} actions={<UpgradeButton suggest="plus" label={t('reports.freeUpgrade')} className="min-h-11 px-4" />} />
+        <PageHeader title={t('reports.title')} actions={<UpgradeButton suggest="plus" label={t('reports.freeUpgrade')} className="min-h-11 px-4" />} />
         <Panel>
           {scores.length === 0 ? <p className="font-bold">{t('reports.freeNone')}</p> : (
             <table className="w-full text-left border-collapse">
@@ -137,7 +137,7 @@ export default function ReportsPage() {
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <TeacherNav />
-      <PageHeader title={t('reports.title')} subtitle={Number.isFinite(days) ? t('reports.historyNote', { days }) : t('reports.subtitle')}
+      <PageHeader title={t('reports.title')}
         actions={<>{Number.isFinite(days) && <UpgradeButton suggest="pro" label={t('upgrade.history')} className="min-h-11 px-4" />}<button type="button" onClick={download} disabled={rows.grouped.length === 0} className="min-h-11 px-4 rounded-pill border-std border-border bg-surface font-bold inline-flex items-center gap-2 disabled:opacity-40"><DownloadSimple weight="bold" size={18} />{t('reports.csv')}</button><Link to={`/teacher/reports/print?${new URLSearchParams(Object.entries({ class: example ? EXAMPLE_CLASS.id : classId, student: filter.studentId ?? '', from: filter.from ?? since ?? '', to: filter.to ?? '' }).filter(([, v]) => v)).toString()}`} className={buttonClasses('main', 'min-h-11 px-4')}><Printer weight="bold" size={18} />{t('rp.print')}</Link></>} />
       <Panel className={`mb-4 !p-3 flex flex-wrap items-center gap-3 ${example ? 'bg-butter' : ''}`}>
         <Eye weight="fill" size={24} aria-hidden="true" />

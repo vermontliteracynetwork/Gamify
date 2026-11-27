@@ -66,7 +66,7 @@ export default function ClassPage() {
   if (!TIERS[tier].studentList) return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
-      <PageHeader title={t('roster.title')} subtitle={t('roster.freeSub')} />
+      <PageHeader title={t('roster.title')} />
       <Panel className="grid gap-3 justify-items-start">
         <p className="font-bold text-lg">{t('roster.freeText')}</p>
         <UpgradeButton suggest="plus" />
@@ -80,7 +80,7 @@ export default function ClassPage() {
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
       {/* No class join codes (teacher, 2026-10-31): students get in with a game code or link. */}
-      <PageHeader title={free ? t('roster.title') : classroom.name} subtitle={t('class.counts', { students: students.length, sets: assignments.length })}
+      <PageHeader title={free ? t('roster.title') : classroom.name}
         actions={<>
           <Link to={`/teacher/reports/print?class=${id}`} className={buttonClasses('secondary')}><Printer weight="bold" size={18} />{t('classes.progress')}</Link>
           <Link to="/teacher/activity" className={buttonClasses('main')}><Plus weight="bold" size={18} />{t('teacherNav.create')}</Link>

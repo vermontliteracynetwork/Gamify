@@ -60,7 +60,7 @@ export default function ClassesPage() {
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
       {/* Make class sits beside the title (teacher, 2026-10-31); its name box opens at the top. */}
-      <PageHeader title={t('classes.title')} subtitle={t('classes.subtitle')}
+      <PageHeader title={t('classes.title')}
         actions={room ? <Button variant="main" onClick={() => setAdding(true)}><Plus weight="bold" size={18} />{t('classes.create')}</Button> : undefined} />
       <div className="grid gap-4">
         {!room && <LimitNote>{t('classes.limit', { limit, count: limit })}</LimitNote>}

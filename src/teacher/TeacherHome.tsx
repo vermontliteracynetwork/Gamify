@@ -39,7 +39,7 @@ export default function TeacherHome() {
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav startOpen={false} />
-      <PageHeader title={t(unfinished ? 'teacherHome.title' : 'teacherHome.titleBack')} subtitle={t(unfinished ? 'teacherHome.sub' : 'teacherHome.subBack')} />
+      <PageHeader title={t(unfinished ? 'teacherHome.title' : 'teacherHome.titleBack')} />
       <div className={`grid gap-4 items-start ${empties.length || unfinished ? 'lg:grid-cols-[minmax(0,1fr)_22rem]' : ''}`}>
         {start && unfinished ? (
           <Panel className="grid gap-4">

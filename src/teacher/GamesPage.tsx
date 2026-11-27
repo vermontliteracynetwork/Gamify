@@ -18,7 +18,7 @@ export default function GamesPage() {
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
-      <PageHeader title={t('tgames.title')} subtitle={t('tgames.sub', { n: GAMES.length })} />
+      <PageHeader title={t('tgames.title')} />
       <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 list-none p-0 m-0">
         {GAMES.map((g) => {
           const open = canPlayGame(tier, g.id);

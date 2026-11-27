@@ -125,7 +125,7 @@ export default function ActivityPage() {
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-5 pb-8">
       <TeacherNav startOpen={false} />
-      <PageHeader title={t('activity.title')} subtitle={t('activity.sub')} />
+      <PageHeader title={t('activity.title')} />
       <div className="grid gap-4 lg:grid-cols-[17rem_minmax(0,1fr)] items-start">
         <Panel className="grid gap-3 content-start order-last lg:order-none !p-4">
           <h2 className="font-heading font-bold text-base m-0">{t('activity.choices')}</h2>

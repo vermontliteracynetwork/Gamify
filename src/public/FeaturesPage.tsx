@@ -20,6 +20,7 @@ import Title from '../ui/Title';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import PublicFooter from './PublicFooter';
 import ThemeGallery from './ThemeGallery';
+import FeatureBento from './FeatureBento';
 import { useScrapbookGround } from './scrapbook/Shell';
 
 // The Features page, rebuilt as the main selling page (owner, 2026-11-26:
@@ -114,25 +115,8 @@ export default function FeaturesPage() {
           </ul>
         </motion.section>
 
-                {/* Fair play, built in (teacher, 2026-11-24: "add the no stealing as a selling
-            point ... psychology first marketing"). Each line answers a weak spot the
-            research found on other classroom game sites (docs/marketing-bible.md,
-            the edge list); never names another site. */}
-        <section id="fair" aria-labelledby="fair-title" className="grid gap-5 scroll-mt-24">
-          <h2 id="fair-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.fair.title')} /></h2>
-          <p className="text-lg font-semibold">{t('features.fair.text')}</p>
-          <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none p-0 m-0">
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <li key={n} className={`${card} p-0`} style={lift}>
-                {/* The title scans; the reason opens under the caret (owner, 2026-11-27). */}
-                <details className="group p-5">
-                  <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden flex items-center gap-3"><Dot bg="var(--color-mint)" size="2.5rem"><Check weight="bold" size={20} aria-hidden="true" /></Dot><b className="font-heading text-lg leading-snug flex-1">{t(`features.fair.${n}` as StringKey)}</b><Caret /></summary>
-                  <p className="font-semibold mt-3 mb-0">{t(`features.fair.${n}.why` as StringKey)}</p>
-                </details>
-              </li>
-            ))}
-          </ul>
-        </section>
+                {/* Fair play folded into one visual bento with the power-ups and shared game pieces (owner, 2026-11-27). */}
+        <FeatureBento />
 
         <Proof />
 
