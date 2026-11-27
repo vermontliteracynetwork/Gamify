@@ -42,7 +42,6 @@ const card = 'bg-white border-bold border-border rounded-panel';
 // The caret on every fold, turning when it opens (owner, 2026-11-27).
 const Caret = () => <span className="w-9 h-9 rounded-full border-std border-border bg-surface grid place-items-center shrink-0"><CaretDown weight="bold" size={18} className="motion-safe:transition-transform group-open:rotate-180" aria-hidden="true" /></span>;
 const lift: CSSProperties = { boxShadow: '0 5px 0 var(--ink)' };
-const JUMPS = ['games', 'learning', 'themes', 'play', 'view', 'fair'] as const;
 const MORE: { key: string; items: number }[] = [
   { key: 'sets', items: 5 }, { key: 'classes', items: 7 }, { key: 'supports', items: 6 }, { key: 'safety', items: 5 },
 ];
@@ -54,19 +53,13 @@ export default function FeaturesPage() {
   return (
     <div>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-4 grid gap-20 sm:gap-24">
-        <section className="grid gap-5" aria-labelledby="features-title">
+        {/* Title and the two buttons only, close to the games (owner, 2026-11-27: "remove the highlighted text and most default subtext ... remove the tabs ... shift the next section menu higher"). */}
+        <section className="grid gap-5 -mb-12 sm:-mb-14" aria-labelledby="features-title">
           <h1 id="features-title" className="title-bubble text-5xl sm:text-6xl"><Title text={t('features.title')} /></h1>
-          <p className="text-xl font-bold">{t('features.sub')}</p>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
             <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop', 'lg')}><ChalkboardTeacher weight="bold" size={22} />{t('public.startFree')}</Link>
             <Link to="/pricing" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.seePlans')}<ArrowRight weight="bold" size={20} /></Link>
-            <span className="font-semibold">{t('features.hero.free')}</span>
           </div>
-          <nav aria-label={t('features.jump')} className="flex flex-wrap gap-2">
-            {JUMPS.map((id) => (
-              <a key={id} href={`#${id}`} className="min-h-11 px-4 rounded-pill border-std border-border bg-white font-bold no-underline text-text inline-flex items-center hover:bg-butter motion-safe:transition">{t(`features.jump.${id}` as StringKey)}</a>
-            ))}
-          </nav>
         </section>
 
         <GamesShowcase />
@@ -74,7 +67,6 @@ export default function FeaturesPage() {
         <motion.section id="learning" {...enter} aria-labelledby="learning-title" className="grid lg:grid-cols-2 gap-8 items-center scroll-mt-24">
           <div className="grid gap-4">
             <h2 id="learning-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.learn.title')} /></h2>
-            <p className="text-lg font-semibold">{t('features.learn.text')}</p>
             <Points prefix="features.learn" n={4} />
           </div>
           <QuestionDemo />
@@ -84,7 +76,6 @@ export default function FeaturesPage() {
           <LookDemo />
           <div className="grid gap-4 lg:order-first">
             <h2 id="themes-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.theme.title')} /></h2>
-            <p className="text-lg font-semibold">{t('features.theme.text')}</p>
             <Points prefix="features.theme" n={4} />
             <p className="font-semibold bg-butter border-std border-border rounded-input p-3">{t('features.theme.challenge')}</p>
             <Link to="/login?mode=signup" className={buttonClasses('primary', 'justify-self-start hover-pop', 'lg')}><PaintBrush weight="bold" size={20} />{t('features.theme.cta')}</Link>
@@ -96,7 +87,6 @@ export default function FeaturesPage() {
 
         <motion.section id="play" {...enter} aria-labelledby="play-title" className="grid gap-5 scroll-mt-24">
           <h2 id="play-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.play.title')} /></h2>
-          <p className="text-lg font-semibold">{t('features.play.text')}</p>
           <ul className="grid md:grid-cols-3 gap-4 list-none p-0 m-0">
             {SHOWN_MODES.map((m) => <ModeCard key={m} mode={m} />)}
           </ul>
@@ -104,7 +94,6 @@ export default function FeaturesPage() {
 
         <motion.section id="view" {...enter} aria-labelledby="view-title" className="grid gap-5 scroll-mt-24">
           <h2 id="view-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.view.title')} /></h2>
-          <p className="text-lg font-semibold">{t('features.view.text')}</p>
           <ul className="grid sm:grid-cols-2 gap-4 list-none p-0 m-0">
             {([[SortAscending, 'var(--color-blue-crystal)'], [ChartBar, 'var(--color-butter)'], [Lock, 'var(--color-blush)'], [FileText, 'var(--color-mint)']] as [Icon, string][]).map(([I, bg], k) => (
               <li key={k} className={`${card} p-5 flex gap-4 items-start`} style={lift}>
@@ -138,7 +127,6 @@ export default function FeaturesPage() {
         {/* Plus and Pro, described by what they open up (teacher, 2026-10-31). */}
         <section aria-labelledby="plans-title" className="grid gap-4">
           <h2 id="plans-title" className="title-bubble text-4xl leading-tight"><Title text={t('features.plans.title')} /></h2>
-          <p className="text-lg font-semibold">{t('features.plans.text')}</p>
           <div className="grid md:grid-cols-2 gap-4">
             {(['plus', 'pro'] as const).map((plan) => (
               <div key={plan} className={`${card} p-5 grid gap-3 content-start`} style={lift}>
@@ -196,7 +184,6 @@ function GamesShowcase() {
       {/* Phones and iPads see the picture right under the title, before the game list. */}
       <div className="grid gap-4 content-start [grid-area:head]">
         <h2 id="games-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.games.title')} /></h2>
-        <p className="text-lg font-semibold">{t('features.games.text')}</p>
       </div>
       <div role="group" aria-label={t('features.games.pick')} className="grid grid-cols-4 gap-2 sm:gap-3 content-start [grid-area:list]">
           {GAMES.map((g) => {

@@ -98,8 +98,7 @@ function Fold({ g, open, onToggle, id }: { g: Group; open: boolean; onToggle: ()
   return (
     <button type="button" aria-expanded={open} aria-controls={id} onClick={onToggle} className="w-full flex items-center gap-3 text-left min-h-12 cursor-pointer">
       <span className="font-display text-xl leading-tight flex-1">{g.title}{g.note && <span className="ml-3 font-body text-base font-bold text-muted normal-case">{g.note}</span>}</span>
-      <span className="text-sm font-bold text-muted whitespace-nowrap">{t('cmp.count', { count: g.rows.length })}</span>
-      <span className="w-9 h-9 rounded-full border-std border-border bg-surface grid place-items-center shrink-0"><CaretDown weight="bold" size={18} className={`motion-safe:transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" /></span>
+      <CaretDown weight="bold" size={22} className={`shrink-0 motion-safe:transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
     </button>
   );
 }
@@ -109,20 +108,11 @@ export default function CompareChart({ titleClass }: { titleClass: string }) {
   const groups = compareGroups();
   // The first section opens; the rest fold, so the chart reads as a short list of topics.
   const [open, setOpen] = useState<Set<string>>(() => new Set(['games']));
-  const allOpen = open.size === groups.length;
   const toggle = (id: string) => setOpen((o) => { const n = new Set(o); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   const shade = (x: Plan) => (x === 'plus' ? 'bg-butter/70' : '');
   return (
     <section id="compare" aria-labelledby="compare-title" className="grid gap-4 mt-4 scroll-mt-20">
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="grid gap-2 flex-1 min-w-64">
-          <h2 id="compare-title" className={titleClass}><Title text={t('cmp.title')} /></h2>
-          <p className="text-lg font-semibold leading-snug max-w-3xl m-0">{t('cmp.sub')}</p>
-        </div>
-        <button type="button" onClick={() => setOpen(allOpen ? new Set() : new Set(groups.map((g) => g.id)))} className="min-h-11 px-4 rounded-pill border-std border-border bg-surface font-bold inline-flex items-center gap-2 hover-pop">
-          {allOpen ? t('cmp.closeAll') : t('cmp.openAll')}<CaretDown weight="bold" size={16} className={allOpen ? 'rotate-180' : ''} aria-hidden="true" />
-        </button>
-      </div>
+      <h2 id="compare-title" className={titleClass}><Title text={t('cmp.title')} /></h2>
 
       {/* Phones: one plan at a time, picked at the top, each section a card. */}
       <div className="sm:hidden grid gap-4">

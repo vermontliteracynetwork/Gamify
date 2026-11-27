@@ -259,7 +259,8 @@ want in the carosel and promotional otherwise."
     to confirm). Built; to check on every device and with the Classic Art
     Director.
 55. [ ] **Beta photos**: shot list and release rules in docs/photo-brief.md;
-    the beta application needs the photo release step (Waiting on you).
+    the release form is drafted in docs/photo-release.md (owner: "draft me a
+    photo release"); the attorney reviews it, then it becomes a beta step.
 56. [ ] **Compare Every Feature edits** (owner, 2026-11-27, marked-up
     screenshots): crossed-out rows removed (new games early, on the big
     screen, in pairs, sign-in pictures, theme guide templates, a code to play
@@ -292,3 +293,12 @@ want in the carosel and promotional otherwise."
     fair-play promises as icon badges. Built; to check.
 61. [x] **Pricing promise chips removed** (No card needed, Cancel any time,
     Accessibility free): "remove."
+62. [ ] **Compare chart tidy** (owner, 2026-11-27): title "Compare Features";
+    no Open all button, no "Open a topic" line, no "X features" on the bars;
+    a plain caret (no circle or white background); "Students" with Free "No
+    class list"; Free sign-in "Type a name or use a random one". Built; to check.
+63. [ ] **Features page top trimmed** (owner: "remove the highlighted text and
+    most default subtext in that manner. remove the tabs like 'the games' and
+    shift the next section menu higher"): title and the two buttons only, no
+    jump tabs, no intro lines under the section titles, the games start
+    higher. Built; to check.

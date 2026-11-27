@@ -490,3 +490,4 @@ line that fits, and add each new preference the same turn she says it.
 - 2026-11-27 (owner): teacher pages have no subtext line under the page title (no "All 8 games. Pick one..." style lines, no username under Account).
 - 2026-11-27 (owner): upgraded plans never see upgrade banners or buttons.
 - 2026-11-27 (owner): feature lists become visual (bento tiles with power-up art, game pieces, photo slots, icon badges), not text cards; Pricing has no promise chips row.
+- 2026-11-27 (owner): public pages skip default subtext under titles and section headings, and no jump-tab rows; the content starts high.
