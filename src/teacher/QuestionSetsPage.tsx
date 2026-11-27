@@ -1,6 +1,6 @@
 import { useMemo, useState, type DragEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Check, Copy, Eye, FileArrowUp, FolderSimple, FolderSimplePlus, Info, MagnifyingGlass, PencilSimple, Play, Plus, RocketLaunch, Trash, Warning } from '@phosphor-icons/react';
+import { Check, Copy, Eye, Question, FileArrowUp, FolderSimple, FolderSimplePlus, Info, MagnifyingGlass, PencilSimple, Play, Plus, RocketLaunch, Trash, Warning } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { LOCAL_TEACHER_ID, useAsync, useMySets, useTier } from '../data/hooks';
@@ -11,7 +11,7 @@ import { t } from '../i18n';
 import { Button, buttonClasses, fieldClasses, IconButton, PageHeader, Panel, Tabs } from '../ui/kit';
 import { gradeLabel, matchesFilter, missingDetails, type SetFilter } from '../data/setDetails';
 import { cleanFolder, facetOptions, folderNames, FOLDERS_KEY, hasFolder, inFolder, matchesFacets, type Facets } from '../data/folders';
-import SetCover from '../games/SetCover';
+import SetCover, { ART } from '../games/SetCover';
 import SetFilterBar from '../games/SetFilterBar';
 import TeacherNav from '../ui/TeacherNav';
 import Dialog from '../ui/Dialog';
@@ -59,7 +59,7 @@ export default function QuestionSetsPage() {
   }
 
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
+    <main className="max-w-[96rem] mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
       <PageHeader
         title={t('sets.title')}
@@ -192,7 +192,7 @@ function MySets({ sets, reload, limit, atLimit, onHost }: { sets: QuestionSet[];
           // of the question set section to be more like this", her two card-wall
           // screenshots): cover on top, title, the details, then the buttons.
           <section className="@container">
-            <ul className="list-none m-0 p-0 columns-1 @[34rem]:columns-2 @[54rem]:columns-3 gap-4">
+            <ul className="list-none m-0 p-0 columns-1 @[30rem]:columns-2 @[46rem]:columns-3 @[62rem]:columns-4 @[78rem]:columns-5 gap-3">
               {shown.map((s) => (
                 <SetRow key={s.id} set={s} stats={stats.get(s.id)} confirming={confirming === s.id}
                   onEdit={() => navigate(`/teacher/sets/${s.id}`)}
@@ -272,63 +272,56 @@ function FolderNameDialog({ title, start, taken, onClose, onSave }: { title: str
   );
 }
 
+// One set as a compact card in the wall (owner, 2026-11-27: "use this layout
+// spacing for the cards on question sets", her card-wall reference): a
+// picture when the set has one, else a thin color band; the title centered;
+// the details small; counts and the buttons in one quiet row.
 function SetRow({ set: s, stats, confirming, onEdit, onMove, onUse, onHost, onDelete, onConfirm, onCancel }: {
   set: QuestionSet; stats?: PlayStats; confirming: boolean;
   onEdit: () => void; onMove: () => void; onUse: () => void; onHost: () => void; onDelete: () => void; onConfirm: () => void; onCancel: () => void;
 }) {
   const name = s.name || t('sets.untitled');
   const notReady = s.questions.filter((q) => !isPlayable(q)).length;
-  const meta = [s.subject, s.grades && t('filter.gradesShort', { grades: gradeLabel(s.grades) }), t('sets.questions', { count: s.questions.length })].filter(Boolean).join(', ');
-  // The first question's picture shows on the cover when the set has no cover of its own.
-  const pic = s.cover ? undefined : s.questions.find((q) => q.imageUrl)?.imageUrl;
+  const sub = [s.subject, s.grades && t('filter.gradesShort', { grades: gradeLabel(s.grades) })].filter(Boolean).join(' · ');
+  const pic = s.cover ?? s.questions.find((q) => q.imageUrl)?.imageUrl;
+  const art = ART[s.subject ?? 'Other'];
   return (
     <li draggable onDragStart={(e) => { e.dataTransfer.setData('text/gamify-set', s.id); e.dataTransfer.effectAllowed = 'move'; }}
-      className="break-inside-avoid mb-4 bg-surface border-bold border-border rounded-panel overflow-hidden grid hover-lift" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-      <button type="button" onClick={onEdit} aria-label={t('sets.editN', { name })} className="block w-full border-b-[2.5px] border-border">
-        {pic ? <img src={pic} alt="" className="block w-full max-h-56 object-cover" /> : <SetCover set={s} className="aspect-[16/8]" />}
+      className="break-inside-avoid mb-3 bg-surface border-std border-border rounded-[1rem] overflow-hidden grid hover-lift" style={{ boxShadow: '0 3px 0 var(--ink)' }}>
+      <button type="button" onClick={onEdit} aria-label={t('sets.editN', { name })} className="block w-full">
+        {pic ? <img src={pic} alt="" className="block w-full max-h-52 object-cover border-b-2 border-border" /> : <span aria-hidden="true" className="block h-3.5 border-b-2 border-border" style={{ background: art.bg }} />}
       </button>
-      <div className="p-4 grid gap-2">
-        <h2 className="font-heading text-lg font-bold leading-snug text-center"><Title text={name} /></h2>
-        <p className="text-sm font-semibold text-muted text-center">{meta}</p>
+      <div className="px-3 pt-2.5 pb-2 grid gap-1 text-center">
+        <h2 className="font-heading text-base font-bold leading-snug"><Title text={name} /></h2>
+        {sub && <p className="text-xs font-semibold text-muted m-0">{sub}</p>}
         {(notReady > 0 || missingDetails(s).length > 0) && (
-          <p className="flex flex-wrap justify-center gap-1.5">
-            {notReady > 0 && <span className="min-h-7 px-2.5 rounded-pill bg-secondary text-text text-xs font-bold inline-flex items-center gap-1"><Warning weight="bold" size={12} aria-hidden="true" />{t('sets.needsWork', { count: notReady })}</span>}
-            {missingDetails(s).length > 0 && <span className="min-h-7 px-2.5 rounded-pill bg-butter text-text text-xs font-bold inline-flex items-center gap-1"><Warning weight="bold" size={12} aria-hidden="true" />{t('sets.needsDetails')}</span>}
+          <p className="flex flex-wrap justify-center gap-1 m-0">
+            {notReady > 0 && <span className="px-2 py-0.5 rounded-pill bg-secondary text-[0.7rem] font-bold inline-flex items-center gap-1"><Warning weight="bold" size={11} aria-hidden="true" />{t('sets.needsWork', { count: notReady })}</span>}
+            {missingDetails(s).length > 0 && <span className="px-2 py-0.5 rounded-pill bg-butter text-[0.7rem] font-bold inline-flex items-center gap-1"><Warning weight="bold" size={11} aria-hidden="true" />{t('sets.needsDetails')}</span>}
           </p>
-        )}
-        {(s.standards?.length || s.noStandard) ? (
-          <p className="flex flex-wrap justify-center gap-1">
-            {(s.standards ?? []).map((c) => <span key={c} className="min-h-7 px-2.5 rounded-pill bg-lavender text-xs font-bold inline-flex items-center">{c}</span>)}
-            {s.noStandard && <span className="min-h-7 px-2.5 rounded-pill bg-lavender text-xs font-bold inline-flex items-center">{t('sets.noStandardChip')}</span>}
-          </p>
-        ) : null}
-        <div className="flex items-center gap-2 text-sm font-bold border-t-2 border-dashed border-border/25 pt-2">
-          {stats ? (
-            <>
-              <span className="text-xs text-muted">{t('sets.firstTry')}</span>
-              <span role="img" aria-label={t('sets.firstTryPct', { pct: stats.pct })} className="inline-block h-2.5 flex-1 max-w-24 rounded-full overflow-hidden bg-[var(--cream)]"><span className="block h-full rounded-full" style={{ width: `${stats.pct}%`, background: skillColor(stats.pct) }} /></span>
-              <span aria-hidden="true">{stats.pct}%</span>
-            </>
-          ) : <span className="text-xs text-muted">{t('sets.notPlayed')}</span>}
-        </div>
-        {confirming ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-bold text-sm w-full">{t('sets.deleteConfirm', { name })}</span>
-            <Button variant="danger" size="sm" onClick={onConfirm}>{t('sets.deleteYes')}</Button>
-            <Button variant="ghost" size="sm" onClick={onCancel}>{t('sets.cancel')}</Button>
-          </div>
-        ) : (
-          <div className="grid gap-1.5">
-            <Button variant="main" onClick={onUse} aria-label={t('sets.useN', { name })} className="w-full justify-center">{t('sets.use')}<ArrowRight weight="bold" size={16} /></Button>
-            <div className="flex items-center gap-1.5">
-              <Button size="sm" onClick={onEdit} aria-label={t('sets.editN', { name })} className="flex-1 justify-center"><PencilSimple weight="bold" size={14} />{t('sets.edit')}</Button>
-              <IconButton label={t('sets.playN', { name })} onClick={onHost}><Play weight="fill" size={16} /></IconButton>
-              <IconButton label={t('sets.moveN', { name })} onClick={onMove}><FolderSimple weight="bold" size={16} /></IconButton>
-              <IconButton variant="ghost" label={`${t('sets.delete')}: ${name}`} onClick={onDelete}><Trash weight="bold" size={16} /></IconButton>
-            </div>
-          </div>
         )}
       </div>
+      <div className="px-3 pb-2 flex items-center gap-2 text-xs font-bold text-muted">
+        <span className="inline-flex items-center gap-1"><Question weight="bold" size={14} aria-hidden="true" />{s.questions.length}<span className="sr-only">{t('sets.questions', { count: s.questions.length })}</span></span>
+        {(s.standards?.length ?? 0) > 0 && <span className="truncate">{s.standards!.join(', ')}</span>}
+        <span className="flex-1" />
+        {stats ? <span title={t('sets.firstTry')} style={{ color: 'var(--text)' }}><span aria-hidden="true">{stats.pct}%</span><span className="sr-only">{t('sets.firstTryPct', { pct: stats.pct })}</span></span> : <span>{t('sets.notPlayed')}</span>}
+      </div>
+      {confirming ? (
+        <div className="px-3 pb-3 flex flex-wrap items-center gap-2">
+          <span className="font-bold text-xs w-full">{t('sets.deleteConfirm', { name })}</span>
+          <Button variant="danger" size="sm" onClick={onConfirm}>{t('sets.deleteYes')}</Button>
+          <Button variant="ghost" size="sm" onClick={onCancel}>{t('sets.cancel')}</Button>
+        </div>
+      ) : (
+        <div className="px-2 pb-2 pt-1.5 flex items-center gap-1 border-t border-border/15">
+          <Button size="sm" variant="main" onClick={onUse} aria-label={t('sets.useN', { name })} className="flex-1 justify-center">{t('sets.use')}</Button>
+          <IconButton label={t('sets.playN', { name })} onClick={onHost}><Play weight="fill" size={15} /></IconButton>
+          <IconButton label={t('sets.editN', { name })} onClick={onEdit}><PencilSimple weight="bold" size={15} /></IconButton>
+          <IconButton label={t('sets.moveN', { name })} onClick={onMove}><FolderSimple weight="bold" size={15} /></IconButton>
+          <IconButton variant="ghost" label={`${t('sets.delete')}: ${name}`} onClick={onDelete}><Trash weight="bold" size={15} /></IconButton>
+        </div>
+      )}
     </li>
   );
 }
@@ -350,28 +343,27 @@ function Library({ atLimit, onCopied, onHost }: { atLimit: boolean; onCopied: (i
       </section>
       <div className="min-w-0 @container">
       {shown.length === 0 && <Panel><p className="font-bold">{t('filter.none')}</p></Panel>}
-      <div className="columns-1 @[34rem]:columns-2 @[54rem]:columns-3 gap-4">
+      <div className="columns-1 @[30rem]:columns-2 @[46rem]:columns-3 @[62rem]:columns-4 @[78rem]:columns-5 gap-3">
         {shown.map((s) => (
-          <div key={s.id} className="break-inside-avoid mb-4 bg-surface border-bold border-border rounded-panel overflow-hidden flex flex-col hover-lift" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            <Link to={`/teacher/library/${s.id}`} aria-label={`${t('sets.preview')}: ${s.name}`} className="block border-b-[2.5px] border-border">{(() => { const pic = s.cover ? undefined : s.questions.find((q) => q.imageUrl)?.imageUrl; return pic ? <img src={pic} alt="" className="block w-full max-h-56 object-cover" /> : <SetCover set={s} className={['aspect-[16/9]', 'aspect-[4/3]', 'aspect-[16/7]'][s.questions.length % 3]} />; })()}</Link>
-            <div className="p-4 flex flex-col gap-2 flex-1">
-              <p className="text-xs font-bold uppercase tracking-wider text-muted">{s.subject} · {t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</p>
-              <h3 className="font-heading text-lg font-bold leading-snug"><Title text={s.name} /></h3>
-              <p className="text-muted text-sm font-bold">{t('sets.questions', { count: s.questions.length })}</p>
-              <p className="flex flex-wrap gap-1">
-                {(s.standards ?? []).map((c) => <span key={c} className="text-xs font-bold px-2 py-0.5 rounded-pill border border-border bg-surface-2">{c}</span>)}
-                {(s.tags ?? []).map((tag) => <span key={tag} className="text-xs font-bold px-2 py-0.5 rounded-pill bg-surface-2 text-muted">#{tag}</span>)}
-              </p>
-              <div className="flex flex-wrap gap-2 mt-auto pt-1">
-                <Button variant="primary" onClick={() => onHost(s)}><Play weight="fill" size={18} />{t('host.open')}</Button>
-                <Link to={`/teacher/library/${s.id}`} className={buttonClasses()}><Eye weight="bold" size={18} />{t('sets.preview')}</Link>
-                <Button disabled={atLimit} onClick={async () => {
-                  const copy = { ...newSet(s.name, s.questions.map((q) => ({ ...q, id: newId('q'), choices: [...q.choices] }))),
-                    subject: s.subject, grades: s.grades, tags: s.tags, standards: s.standards, noStandard: s.noStandard, cover: s.cover };
-                  await data.saveQuestionSet(copy);
-                  onCopied(copy.id);
-                }}><Copy weight="bold" size={18} />{t('sets.copy')}</Button>
-              </div>
+          <div key={s.id} className="break-inside-avoid mb-3 bg-surface border-std border-border rounded-[1rem] overflow-hidden flex flex-col hover-lift" style={{ boxShadow: '0 3px 0 var(--ink)' }}>
+            <Link to={`/teacher/library/${s.id}`} aria-label={`${t('sets.preview')}: ${s.name}`} className="block border-b-2 border-border">{(() => { const pic = s.cover ?? s.questions.find((q) => q.imageUrl)?.imageUrl; return pic ? <img src={pic} alt="" className="block w-full max-h-52 object-cover" /> : <SetCover set={s} className={['aspect-[16/9]', 'aspect-[4/3]', 'aspect-[16/7]'][s.questions.length % 3]} />; })()}</Link>
+            <div className="px-3 pt-2.5 pb-2 grid gap-1 text-center">
+              <h3 className="font-heading text-base font-bold leading-snug"><Title text={s.name} /></h3>
+              <p className="text-xs font-semibold text-muted m-0">{s.subject} · {t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</p>
+            </div>
+            <div className="px-3 pb-2 flex items-center gap-2 text-xs font-bold text-muted">
+              <span className="inline-flex items-center gap-1"><Question weight="bold" size={14} aria-hidden="true" />{s.questions.length}<span className="sr-only">{t('sets.questions', { count: s.questions.length })}</span></span>
+              {(s.standards?.length ?? 0) > 0 && <span className="truncate">{s.standards!.join(', ')}</span>}
+            </div>
+            <div className="px-2 pb-2 pt-1.5 flex items-center gap-1 border-t border-border/15">
+              <Button size="sm" variant="primary" className="flex-1 justify-center" onClick={() => onHost(s)}><Play weight="fill" size={14} />{t('host.open')}</Button>
+              <Link to={`/teacher/library/${s.id}`} aria-label={`${t('sets.preview')}: ${s.name}`} title={t('sets.preview')} className={buttonClasses('secondary', 'w-10 h-10 !p-0 justify-center', 'sm')}><Eye weight="bold" size={15} /></Link>
+              <IconButton label={`${t('sets.copy')}: ${s.name}`} disabled={atLimit} onClick={async () => {
+                const copy = { ...newSet(s.name, s.questions.map((q) => ({ ...q, id: newId('q'), choices: [...q.choices] }))),
+                  subject: s.subject, grades: s.grades, tags: s.tags, standards: s.standards, noStandard: s.noStandard, cover: s.cover };
+                await data.saveQuestionSet(copy);
+                onCopied(copy.id);
+              }}><Copy weight="bold" size={15} /></IconButton>
             </div>
           </div>
         ))}

@@ -504,3 +504,7 @@ line that fits, and add each new preference the same turn she says it.
 - 2026-11-27 (owner): the astrology advisor speaks in short interpretive sentences with constellation line art.
 - 2026-11-27 (owner): the portal home counts question sets made by teachers (not her) with day/week/month/YTD/all; the theme review shows as a progression (AI approved, held for review, auto struck: rare, usually hold for review).
 - 2026-11-27 (owner): a floating magenta developer menu (double-click to open) for plan views on every page and pretend students in live games.
+- 2026-11-27 (owner): team setup cards are the team picture alone (glow and bob on hover) with the name centered under it on a dark shaded plate; picker boxes show just the player's name. No person/computer switch: Solo is vs the computer, Share is people.
+- 2026-11-27 (owner): question set walls use compact cards with tight spacing (up to five columns).
+- 2026-11-27 (owner): prices show stacked savings with minus lines in a bright color, the struck standard price and the total in Grow Year (people love seeing savings); no per-day line.
+- 2026-11-27 (owner): homework can be one theme for one game, a choice board of a few themes per game, or unlimited game and theme choice for students (selling point: autonomy).

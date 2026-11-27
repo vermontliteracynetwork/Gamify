@@ -8,9 +8,6 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide'; urgent?: boolean }
 
 export const WAITING: WaitingItem[] = [
-  { id: 'supabase-0019', kind: 'setup', added: '2026-11-27', title: 'Run 0019 so Home counts teachers\' question sets',
-    why: 'The Home card now shows question sets made by teachers (not you) for today, this week, this month, this year and all time. It reads one new database function.',
-    how: 'Supabase SQL Editor: run supabase/migrations/0019_owner_set_counts.sql (safe to run twice).' },
   { id: 'beta-photo-release', kind: 'legal', added: '2026-11-27', urgent: true, title: 'Beta photo release form (faces, or hands and work only)',
     why: 'You want real photos of classes playing and making themes for the Pricing carousel and promotion. Faces of children need a signed release from a parent or guardian; hands, the back of a head or the work only need the school and teacher OK. The shot list and rules are in docs/photo-brief.md. The 13 example photos you sent were found online, so they are references only and never ship.',
     how: 'A draft is ready in docs/photo-release.md (parent choice of face, hands and work only, or no; uses; withdrawal; teacher and school part; five questions for the attorney). Send it to the attorney, then say yes to adding it as a beta requirement. Then beta teachers send photos with the release tag.' },

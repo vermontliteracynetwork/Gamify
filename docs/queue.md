@@ -408,3 +408,28 @@ want in the carosel and promotional otherwise."
     collapse; owner only): see every page as Free, Plus, Pro or Homeschool;
     send 1 to 40 pretend students into a live code at a chosen accuracy; quick
     links. Built; to check with a real live game.
+90. [ ] **Team cards like her reference**: the team picture alone (glow and a
+    little bob on hover), the name centered under it on a dark ink plate with
+    slight shading; the picker box shows only the player's name at the left.
+91. [x] **No person/computer switch**: Solo plays the computer, Share players
+    are people.
+92. [ ] **Question set cards spaced like her card-wall reference**: up to five
+    columns, compact cards (picture or a thin color band, centered title,
+    small details, counts and icon buttons in one row).
+93. [ ] **Share teams** ("improve the layout ... dramatically ... show list
+    (individual card) for each player added. remove student add button on
+    right"): the new team layout on top, each student on a team as their own
+    card under it, and the class tools inline (class, Random, Balanced, tap a
+    student then a team); the Students on teams button and its page are gone.
+94. [ ] **Pricing cards show stacked savings** ("show a minus symbol to deduct
+    the Player One Sale ... cross out total ... discounts can be stacked"):
+    the monthly price struck, "− 20% for a year" and "− 10% Player One Sale" in
+    bright magenta, the total in Grow Year, a "You save 28% stacked" chip.
+    The per-day line is gone. Did it differently: one short renewal line stays
+    (first term price, then the renewal price) because a price must say what
+    it renews at (ROSCA and state automatic-renewal rules).
+95. [ ] **Homework choices** (owner note: "for homework, teachers can set a
+    choice board for a few different themes per game, OR they can set one
+    theme for one game OR they can have unlimited game and theme selection
+    for the students to choose from"): build the three homework modes in
+    Create an Activity; marketing point: student autonomy.

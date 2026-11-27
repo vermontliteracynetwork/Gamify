@@ -1226,6 +1226,9 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 
 - (2026-11-27) The "Made by your class" carousel story (draw it, snap it in, play it, pick the next one) as a four-slide Instagram carousel and a TikTok, with released beta photos. The Player One Sale as a bright countdown post before Jan 1, 2027.
 
+- (2026-11-27) Homework with student choice: one theme for one game, a few themes per game, or any game and any theme. Kids pick how their practice looks (autonomy; Patall, Cooper and Robinson 2008).
+- (2026-11-27) Stacked savings on Pricing: yearly 20% plus the Player One Sale 10%, shown as minus lines over a struck price.
+
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
 Direct from you (2026-10-24): a running list of blog-style articles for the

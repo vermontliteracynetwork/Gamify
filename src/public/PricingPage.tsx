@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowDown, ArrowRight, Buildings, CaretDown, House, Check } from '@phosphor-icons/react';
-import { BILLINGS, PRICES_USD, SCHOOL_MIN_SEATS, billingMonths, billingSavings, type Billing, type Tier } from '../config';
+import { BILLINGS, LAUNCH_OFFER, PRICES_USD, SCHOOL_MIN_SEATS, billingMonths, billingSavings, type Billing, type Tier } from '../config';
 import { data, newId } from '../data';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -12,6 +12,7 @@ import Title from '../ui/Title';
 import { ScrapbookPage } from './scrapbook/Shell';
 import Accordion from '../ui/Accordion';
 import CompareChart from './CompareChart';
+import { saleLive } from './LaunchSaleBanner';
 import LaunchSaleBanner from './LaunchSaleBanner';
 
 // Plans and pricing, value first (teacher, 2026-10-25): what a teacher gets
@@ -26,11 +27,8 @@ import LaunchSaleBanner from './LaunchSaleBanner';
 // Plus keeps its Butter card and deeper shadow, with no label on it.
 const CARD = 'sb-card';
 // About what a yearly plan costs a school day (180 days), as on the approved mockup.
-const perDay = (year: number) => { const d = year / 180; return d < 1 ? t('pricing.perDayCents', { n: Math.round(d * 100) }) : t('pricing.perDayDollars', { n: d.toFixed(2) }); };
 // One Grow Year size for section titles (the approved /brand Pricing mockup).
 const H2 = 'title-bubble text-[2rem] sm:text-[2.75rem] leading-none';
-const money = (n: number) => (n % 1 ? n.toFixed(2) : String(n));
-const perMonth = (x: Exclude<Tier, 'free'>, b: Billing) => { const m = PRICES_USD[x][b] / billingMonths(b); return m % 1 ? m.toFixed(2) : String(m); };
 
 export default function PricingPage() {
   const reduce = useReducedMotion();
@@ -70,7 +68,7 @@ export default function PricingPage() {
                 <div className="grid gap-1 pt-4 border-t-2 border-dashed border-border">
                   {x === 'free'
                     ? <><p className="font-score text-5xl leading-none tabular-nums m-0">{t('pricing.free.price')}</p><p className="font-semibold m-0">{t('pricing.free.note')}</p></>
-                    : <><p className="m-0 flex flex-wrap items-baseline gap-x-2"><span className={`font-score leading-none tabular-nums ${x === 'plus' ? 'text-6xl' : 'text-5xl'}`}>{t('pricing.price', { m: perMonth(x as 'plus' | 'pro', billing) })}</span><span className="text-lg font-bold">{t('upgrade.perMonth')}</span></p><p className="font-semibold m-0">{t(`pricing.renews.${billing}` as StringKey, { n: money(PRICES_USD[x as 'plus' | 'pro'][billing]) })}</p>{billing === 'year' && <p className="text-sm font-semibold text-muted m-0">{perDay(PRICES_USD[x as 'plus' | 'pro'].year)}</p>}</>}
+                    : <StackedPrice plan={x as 'plus' | 'pro'} billing={billing} big={x === 'plus'} />}
                 </div>
                 <Link to={x === 'free' ? '/login?mode=signup' : `/login?mode=signup&plan=${x}`} className={buttonClasses('go', 'min-h-14 text-lg hover-pop')}>
                   {x === 'free' ? t('public.startFree') : t('pricing.startWith', { plan: t(`pricing.${x}`) })}
@@ -191,5 +189,36 @@ function PrincipalNote() {
       <p className="font-semibold text-sm mt-2 mb-2 whitespace-pre-line">{note}</p>
       <Button onClick={async () => { try { await navigator.clipboard.writeText(note); setCopied(true); } catch { setCopied(false); } }}>{copied ? t('pricing.noteCopied') : t('pricing.noteCopy')}</Button>
     </details>
+  );
+}
+
+// The price as stacked savings (owner, 2026-11-27: "show a minus symbol to
+// deduct the Player One Sale 10 percent in addition ... cross out total before
+// additional discount. show that the discounts can be stacked for ultimate
+// savings"). The standard monthly price struck through, each saving as a
+// bright minus line, then the total in Grow Year. One short renewal line
+// stays under it: a price must say what it renews at (ROSCA and state
+// automatic-renewal rules, the marketing bible).
+const BRIGHT = '#e0218a';
+function StackedPrice({ plan, billing, big }: { plan: 'plus' | 'pro'; billing: Billing; big: boolean }) {
+  const months = billingMonths(billing);
+  const standard = PRICES_USD[plan].month;
+  const term = PRICES_USD[plan][billing];
+  const perMonthTerm = term / months;
+  const sale = saleLive();
+  const off = Math.round(LAUNCH_OFFER.discount * 100);
+  const final = perMonthTerm * (sale ? 1 - LAUNCH_OFFER.discount : 1);
+  const lengthSave = billingSavings(plan, billing);
+  const totalSave = Math.round((1 - final / standard) * 100);
+  const m2 = (n: number) => n.toFixed(2).replace(/\.00$/, '');
+  return (
+    <div className="grid gap-1.5">
+      {(lengthSave > 0 || sale) && <p className="m-0 text-lg font-bold text-muted line-through decoration-2 tabular-nums">{t('pricing.stack.was', { m: m2(standard) })}</p>}
+      {lengthSave > 0 && <p className="m-0 font-bold tabular-nums" style={{ color: BRIGHT }}>{t('pricing.stack.length', { pct: lengthSave, label: t(`pricing.stack.${billing}` as StringKey) })}</p>}
+      {sale && <p className="m-0 font-bold tabular-nums" style={{ color: BRIGHT }}>{t('pricing.stack.sale', { pct: off, name: LAUNCH_OFFER.name })}</p>}
+      <p className="m-0 flex flex-wrap items-baseline gap-x-2"><span className={`font-display leading-none tabular-nums ${big ? 'text-6xl' : 'text-5xl'}`}>${m2(final)}</span><span className="text-lg font-bold">{t('upgrade.perMonth')}</span></p>
+      {totalSave > 0 && <span className="justify-self-start rounded-pill px-3 min-h-8 inline-flex items-center text-sm font-bold text-white border-std border-border" style={{ background: BRIGHT }}>{t('pricing.stack.total', { pct: totalSave })}</span>}
+      <p className="m-0 text-xs font-semibold text-muted">{sale ? t('pricing.stack.fine', { first: m2(term * (1 - LAUNCH_OFFER.discount)), n: m2(term), per: t(`cmp.per.${billing}` as StringKey) }) : t('pricing.stack.fineNoSale', { n: m2(term), per: t(`cmp.per.${billing}` as StringKey) })}</p>
+    </div>
   );
 }
