@@ -33,7 +33,7 @@ export function compareGroups(): Group[] {
   const perClass = (x: Plan) => (!TIERS[x].studentList ? t('cmp.students.none') : !Number.isFinite(TIERS[x].studentsPerClassroom) ? t('pricing.unlimited') : t('cmp.students.plus', { n: TIERS[x].studentsPerClassroom }));
   return [
     { id: 'games', title: t('cmp.s.games'), rows: [
-      row('pricing.row.games', 'cmp.games.what', (x) => (x === 'free' ? t('cmp.games.free') : t('cmp.games.all'))),
+      row('pricing.row.games', 'cmp.games.what', (x) => (x === 'free' ? t('cmp.games.free') : x === 'pro' ? t('cmp.games.pro') : t('cmp.games.all'))),
       row('cmp.liveLobby', 'cmp.liveLobby.what', (x) => (TIERS[x].liveMode ? true : t('cmp.liveLobby.free'))),
       row('cmp.groups', 'cmp.groups.what', (x) => TIERS[x].setPerStudent),
       row('pricing.row.each', 'cmp.each.what', (x) => TIERS[x].gamePerStudent),

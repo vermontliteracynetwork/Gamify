@@ -1,8 +1,7 @@
 import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ArrowRight, CaretDown, ChalkboardTeacher, ChartBar, Check, FileText, Leaf, Lock, PaintBrush, SortAscending, SpeakerHigh, Star, TextAa, X, type Icon } from '@phosphor-icons/react';
-import PlanFeatures from '../billing/PlanFeatures';
+import { ArrowRight, Broadcast, CaretDown, GameController, House, Infinity as InfinityIcon, SquaresFour, UsersThree, ChalkboardTeacher, ChartBar, Check, FileText, Leaf, Lock, PaintBrush, SortAscending, SpeakerHigh, Star, TextAa, X, type Icon } from '@phosphor-icons/react';
 import type { PlayMode } from '../data/types';
 import { speak } from '../engine/feedback';
 import { GameCover } from '../games/covers';
@@ -127,20 +126,32 @@ export default function FeaturesPage() {
           </div>
         </section>
 
-        {/* Plus and Pro, described by what they open up (teacher, 2026-10-31). */}
-        <section aria-labelledby="plans-title" className="grid gap-4">
+        {/* Plus and Pro in a few big words (owner, 2026-11-27: "make this scannable and
+            easy visual read. highlight features in differnet words and maybe shorter
+            lists than the pricing"): a tagline, four icon tiles, one button. Plus is
+            the full classroom (anchoring: it reads as the natural pick), Pro the
+            no-limits step up. */}
+        <section aria-labelledby="plans-title" className="grid gap-5">
           <h2 id="plans-title" className="title-bubble text-4xl leading-tight"><Title text={t('features.plans.title')} /></h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            {(['plus', 'pro'] as const).map((plan) => (
-              <div key={plan} className={`${card} p-5 grid gap-3 content-start`} style={lift}>
-                <h3 className="font-heading font-bold text-2xl">{t(`features.plans.${plan}` as StringKey)}</h3>
-                <p className="font-bold">{t(`pricing.${plan}.who` as StringKey)}</p>
-                <PlanFeatures plan={plan} />
-                <Link to="/pricing" className={buttonClasses('secondary', 'justify-self-start hover-pop')}>{t(`features.plans.see.${plan}` as StringKey)}<ArrowRight weight="bold" size={18} /></Link>
+          <div className="grid md:grid-cols-2 gap-5">
+            {([['plus', 'bg-butter', [GameController, PaintBrush, Broadcast, ChartBar]], ['pro', 'bg-lavender', [InfinityIcon, UsersThree, SquaresFour, House]]] as const).map(([plan, bg, icons]) => (
+              <div key={plan} className={`rounded-[1.75rem] border-[3.5px] border-border ${bg} p-6 sm:p-8 grid gap-5 content-start`} style={{ boxShadow: '0 8px 0 var(--ink)' }}>
+                <div className="grid gap-1">
+                  <h3 className="title-bubble text-[2.6rem] leading-none">{t(`features.plans.${plan}` as StringKey)}</h3>
+                  <p className="font-bold text-lg m-0">{t(`features.plans.${plan}.tag` as StringKey)}</p>
+                </div>
+                <ul className="grid grid-cols-2 gap-3 list-none p-0 m-0">
+                  {icons.map((I, n) => (
+                    <li key={n} className="bg-paper border-std border-border rounded-[1.1rem] p-3 grid gap-2 content-start" style={{ boxShadow: '0 3px 0 var(--ink)' }}>
+                      <span className="w-11 h-11 rounded-full bg-surface border-std border-border grid place-items-center" aria-hidden="true"><I weight="bold" size={22} /></span>
+                      <b className="font-heading leading-tight">{t(`features.plans.${plan}.${n + 1}` as StringKey)}</b>
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/pricing" className={buttonClasses(plan === 'plus' ? 'go' : 'main', 'justify-self-start hover-pop', 'lg')}>{t(`features.plans.see.${plan}` as StringKey)}<ArrowRight weight="bold" size={18} /></Link>
               </div>
             ))}
           </div>
-          <p className="font-semibold text-sm">{t('features.plans.free')}</p>
         </section>
 
         <section aria-labelledby="end-title" className={`${card} p-6 sm:p-8 grid gap-4 justify-items-center text-center`} style={lift}>
@@ -184,38 +195,64 @@ function Points({ prefix, n }: { prefix: string; n: number }) {
 
 // The real games: pick one, and its live picture cycles every theme it can
 // wear, the visitor's own Theme Builder themes included.
+// The games (owner, 2026-11-27): "no white background and ... a white
+// background around the game board and the section to the right, as if you
+// just kind of dragged the white background away from the games". The covers
+// sit in two arches beside the card (top and bottom closest, the middle bowing
+// out), each tilted its own way and gently wiggling with a soft light; hover
+// freezes one, a tap picks it, and the picked cover glows. No labels: the
+// cover is the button (its name is read to screen readers).
+const TILTS = [-7, 5, -4, 8, 6, -6, 4, -8];
+const BOW = [0, 1, 1, 0];
+function GameIcon({ g, i, on, side, onPick }: { g: (typeof GAMES)[number]; i: number; on: boolean; side: -1 | 1; onPick: () => void }) {
+  const reduce = useReducedMotion();
+  const tilt = TILTS[i % TILTS.length];
+  return (
+    <motion.button type="button" aria-pressed={on} aria-label={g.name} onClick={onPick}
+      className="relative block w-full rounded-[1.1rem] border-std border-border overflow-hidden bg-white cursor-pointer"
+      style={{ x: `${BOW[i % 4] * side * 1.6}rem`, rotate: tilt }}
+      animate={reduce ? { rotate: tilt } : { rotate: [tilt - 2.5, tilt + 2.5, tilt - 2.5], y: [0, -3, 0], boxShadow: on ? ['0 0 0 4px var(--color-lemon), 0 0 18px 6px rgba(250,190,55,0.55), 0 6px 0 var(--ink)', '0 0 0 4px var(--color-lemon), 0 0 30px 12px rgba(250,190,55,0.75), 0 6px 0 var(--ink)', '0 0 0 4px var(--color-lemon), 0 0 18px 6px rgba(250,190,55,0.55), 0 6px 0 var(--ink)'] : '0 6px 0 var(--ink), 0 10px 18px rgba(29,26,51,0.22)' }}
+      transition={{ duration: 2.6 + (i % 3) * 0.5, repeat: Infinity, ease: 'easeInOut', delay: i * 0.21 }}
+      whileHover={reduce ? undefined : { rotate: tilt, y: -6, scale: 1.08, transition: { duration: 0.2 } }}>
+      <GameCover gameId={g.id} className="aspect-[4/3]" />
+      {/* A soft light sweeping across the cover as it wiggles. */}
+      <span aria-hidden="true" className="absolute inset-0 pointer-events-none bg-[linear-gradient(115deg,rgba(255,255,255,0)_30%,rgba(255,255,255,0.45)_50%,rgba(255,255,255,0)_70%)] mix-blend-screen" />
+    </motion.button>
+  );
+}
+
 function GamesShowcase() {
   const { themes: made } = useMadeThemes();
   const [id, setId] = useState(GAMES[0].id);
   const game = GAMES.find((g) => g.id === id) ?? GAMES[0];
   const looks = useMemo(() => showcaseThemes(game.id, made), [game.id, made]);
+  const half = Math.ceil(GAMES.length / 2);
+  const left = GAMES.slice(0, half), right = GAMES.slice(half);
+  const column = (list: typeof GAMES, side: -1 | 1, start: number) => (
+    <div role="group" aria-label={t('features.games.pick')} className="grid gap-5 content-center w-[9.5rem] xl:w-[11rem]">
+      {list.map((g, k) => <GameIcon key={g.id} g={g} i={start + k} side={side} on={g.id === game.id} onPick={() => setId(g.id)} />)}
+    </div>
+  );
   return (
-    <section id="games" aria-labelledby="games-title" className={`${card} p-4 sm:p-6 lg:p-8 grid gap-5 lg:gap-x-8 items-start scroll-mt-24 [grid-template-areas:'head'_'pic'_'list'_'info'] lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:grid-rows-[auto_auto_1fr] lg:[grid-template-areas:'head_pic'_'list_pic'_'list_info']`} style={lift}>
-      {/* Phones and iPads see the picture right under the title, before the game list. */}
-      <div className="grid gap-4 content-start [grid-area:head]">
-        <h2 id="games-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.games.title')} /></h2>
+    <section id="games" aria-labelledby="games-title" className="grid gap-6 scroll-mt-24">
+      <h2 id="games-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.games.title')} /></h2>
+      {/* Phones and tablets: the covers in one tilted row above the card. */}
+      <div role="group" aria-label={t('features.games.pick')} className="lg:hidden grid grid-cols-4 gap-3 sm:gap-4 px-1">
+        {GAMES.map((g, i) => <GameIcon key={g.id} g={g} i={i} side={1} on={g.id === game.id} onPick={() => setId(g.id)} />)}
       </div>
-      <div role="group" aria-label={t('features.games.pick')} className="grid grid-cols-4 gap-2 sm:gap-3 content-start [grid-area:list]">
-          {GAMES.map((g) => {
-            const on = g.id === game.id;
-            return (
-              <button key={g.id} type="button" aria-pressed={on} onClick={() => setId(g.id)}
-                className={`group rounded-input border-std border-border p-1 grid gap-1 content-start text-center motion-safe:transition ${on ? 'bg-butter ring-[3px] ring-ink' : 'bg-white hover:bg-surface-hover'}`}>
-                <span className="block overflow-hidden rounded-[0.6rem] border border-border motion-safe:transition-transform group-hover:scale-[1.03]" aria-hidden="true"><GameCover gameId={g.id} className="aspect-[4/3]" /></span>
-                <span className="font-bold text-xs sm:text-sm leading-tight min-h-[2.5em] grid place-items-center">{g.name}</span>
-              </button>
-            );
-          })}
-      </div>
-      <ThemeCycler gameId={game.id} gameName={game.name} looks={looks} className="min-w-0 [grid-area:pic]" />
-      <div className="grid gap-3 min-w-0 [grid-area:info]">
-          <p className="text-lg font-bold"><span className="font-heading">{game.name}:</span> {game.tagline}</p>
+      <div className="grid lg:grid-cols-[auto_minmax(0,1fr)_auto] gap-6 xl:gap-10 items-center">
+        <div className="hidden lg:block">{column(left, -1, 0)}</div>
+        <div className={`${card} p-4 sm:p-6 grid gap-4 min-w-0`} style={lift}>
+          <ThemeCycler gameId={game.id} gameName={game.name} looks={looks} className="min-w-0" />
+          <p className="text-lg font-bold m-0"><span className="font-heading">{game.name}:</span> {game.tagline}</p>
           <div className="flex flex-wrap gap-2">{shownModes(game.modes).map((m) => <ModeBadge key={m} mode={m} />)}</div>
-          <p className="flex flex-wrap gap-x-5 gap-y-2 font-bold">
+          <p className="flex flex-wrap gap-x-5 gap-y-2 font-bold m-0">
             <Link to={`/blog/how-to-play/${game.id}`} className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('features.games.howTo')}<ArrowRight weight="bold" size={16} /></Link>
             <Link to={`/blog/themes/${game.id}`} className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('features.games.guide')}<ArrowRight weight="bold" size={16} /></Link>
             <Link to="/themes" className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('themes.seeAll')}<ArrowRight weight="bold" size={16} /></Link>
           </p>
+        </div>
+        <div className="hidden lg:block">{column(right, 1, half)}</div>
       </div>
     </section>
   );

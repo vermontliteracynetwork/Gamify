@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { ArrowRight, Heart, MagnifyingGlass, Sparkle, Trophy } from '@phosphor-icons/react';
+import { ArrowRight, Crown, Heart, MagnifyingGlass, Sparkle, Trophy } from '@phosphor-icons/react';
 import { tagLabel } from '../theme/tags';
 import { fieldClasses } from '../ui/kit';
 import { GAMES } from '../games/registry';
@@ -145,28 +145,51 @@ export function ThemeGallery({ signedIn = false }: { signedIn?: boolean }) {
 
 function ChallengeSpot() {
   const reduce = useReducedMotion();
-  const sparks: [number, number, string, number][] = [[8, 18, 'var(--color-pink)', 26], [22, 78, 'var(--color-sky)', 20], [88, 14, 'var(--color-lime)', 24], [94, 70, 'var(--color-paper)', 18], [55, 8, 'var(--color-paper)', 16]];
+  // The frame shows real looks taking turns, so it reads as "a theme like this, by your class".
+  const looks = [...STARTER_THEMES].sort((a, b) => a.order - b.order).slice(0, 5);
+  const [at, setAt] = useState(0);
+  useEffect(() => {
+    if (reduce || looks.length < 2) return;
+    const id = window.setInterval(() => setAt((x) => (x + 1) % looks.length), 3000);
+    return () => window.clearInterval(id);
+  }, [reduce, looks.length]);
+  const x = looks[at];
+  const bits: [number, number, string, number, 'star' | 'dot' | 'tri'][] = [[4, 10, 'var(--color-pink)', -10, 'tri'], [46, 6, 'var(--color-sky)', 0, 'star'], [6, 82, 'var(--color-kelly)', 0, 'dot'], [44, 88, 'var(--color-grape)', 20, 'tri'], [96, 8, 'var(--color-pink)', 0, 'star'], [94, 86, 'var(--color-sky)', 0, 'dot'], [30, 92, 'var(--color-orange)', 0, 'star']];
   return (
-    <Link to="/challenge" className="group relative block rounded-[1.9rem] border-[3.5px] border-border bg-grape text-white overflow-hidden no-underline hover-lift" style={{ boxShadow: '0 8px 0 var(--ink)' }}>
-      {sparks.map(([x, y, c, z], i) => (
-        <motion.span key={i} aria-hidden="true" className="absolute" style={{ left: `${x}%`, top: `${y}%`, color: c }}
-          animate={reduce ? undefined : { rotate: [0, 20, 0], scale: [1, 1.2, 1] }} transition={{ duration: 2.4 + i * 0.3, repeat: Infinity, ease: 'easeInOut' }}>
-          <Sparkle weight="fill" size={z} />
+    <Link to="/challenge" className="group relative block rounded-[1.9rem] border-[3.5px] border-border bg-lemon overflow-hidden no-underline text-text hover-lift" style={{ boxShadow: '0 8px 0 var(--ink)' }}>
+      {/* Sun rays behind everything, slowly turning. */}
+      <motion.span aria-hidden="true" className="absolute -inset-[40%] opacity-60 pointer-events-none"
+        style={{ background: 'repeating-conic-gradient(from 0deg, #ffe48a 0deg 10deg, transparent 10deg 20deg)' }}
+        animate={reduce ? undefined : { rotate: 360 }} transition={{ duration: 60, repeat: Infinity, ease: 'linear' }} />
+      {bits.map(([l, tp, c, r, k], i) => (
+        <motion.span key={i} aria-hidden="true" className="absolute" style={{ left: `${l}%`, top: `${tp}%`, rotate: r, color: c }}
+          animate={reduce ? undefined : { y: [0, -6, 0] }} transition={{ duration: 2 + i * 0.3, repeat: Infinity, ease: 'easeInOut' }}>
+          {k === 'star' ? <Sparkle weight="fill" size={30} /> : k === 'dot' ? <span className="block w-5 h-5 rounded-full border-[2.5px] border-border" style={{ background: c }} /> : <svg width="28" height="26" viewBox="0 0 28 26"><path d="M14 2 L26 24 H2 Z" fill={c} stroke="var(--ink)" strokeWidth="2.5" strokeLinejoin="round" /></svg>}
         </motion.span>
       ))}
-      <div className="relative grid gap-6 p-6 sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] items-center">
+      <div className="relative grid gap-8 p-6 sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] items-center">
         <div className="grid gap-4 justify-items-start">
-          <span className="rounded-pill bg-pink border-std border-border px-4 min-h-10 inline-flex items-center gap-2 font-bold"><Trophy weight="fill" size={20} aria-hidden="true" />{t('themes.challengeKicker')}</span>
-          <span className="title-bubble text-[2.2rem] sm:text-[3rem] leading-[0.98] text-white"><Words text={t('themes.featuredTitle')} /></span>
-          <span className="rounded-pill bg-lemon text-text border-std border-border px-4 min-h-11 inline-flex items-center font-bold text-lg" style={{ boxShadow: '0 3px 0 var(--ink)' }}>{t('themes.challengePrize')}</span>
-          <span className={buttonClasses('go', 'group-hover:scale-105 motion-safe:transition-transform', 'lg')}>{t('themes.challengeLink')}<ArrowRight weight="bold" size={20} /></span>
+          <span className="rounded-pill bg-pink text-white border-std border-border px-4 min-h-10 inline-flex items-center gap-2 font-bold" style={{ boxShadow: '0 3px 0 var(--ink)' }}><Trophy weight="fill" size={20} aria-hidden="true" />{t('themes.challengeKicker')}</span>
+          <span className="title-bubble text-[2.3rem] sm:text-[3.2rem] leading-[0.95]"><Words text={t('themes.featuredTitle')} /></span>
+          <span className="rounded-pill bg-grape text-white border-std border-border px-4 min-h-11 inline-flex items-center gap-2 font-bold text-lg" style={{ boxShadow: '0 3px 0 var(--ink)' }}><Crown weight="fill" size={20} aria-hidden="true" />{t('themes.challengePrize')}</span>
+          <span className={buttonClasses('main', 'group-hover:scale-105 motion-safe:transition-transform', 'lg')}>{t('themes.challengeLink')}<ArrowRight weight="bold" size={20} /></span>
         </div>
-        {/* The empty frame: a dashed gold spotlight with the trophy, waiting for the winning theme. */}
-        <div className="relative aspect-[16/10] rounded-[1.4rem] border-[6px] border-lemon bg-[radial-gradient(circle_at_50%_40%,#fff6cf_0%,#ffd76a_35%,#4b2fc9_75%)] grid place-items-center" style={{ boxShadow: '0 6px 0 var(--ink), inset 0 0 0 3px var(--ink)' }} aria-hidden="true">
-          <span className="absolute inset-3 rounded-[1rem] border-[3px] border-dashed border-text/40" />
-          <motion.span className="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-lemon border-[3.5px] border-border grid place-items-center text-text" style={{ boxShadow: '0 6px 0 var(--ink)' }}
-            animate={reduce ? undefined : { y: [0, -10, 0], rotate: [-4, 4, -4] }} transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}>
-            <Trophy weight="fill" size={64} />
+        {/* A gold award frame, tilted, with real looks taking turns inside, a ribbon and a medal. */}
+        <div className="relative justify-self-center w-full max-w-[34rem] rotate-[2.5deg] group-hover:rotate-0 motion-safe:transition-transform" aria-hidden="true">
+          <div className="rounded-[1.4rem] border-[3.5px] border-border p-3 sm:p-4" style={{ background: 'linear-gradient(135deg,#ffd76a,#fabe37 45%,#ff9b28)', boxShadow: '0 8px 0 var(--ink)' }}>
+            <div className="rounded-[0.9rem] border-[3px] border-border bg-paper overflow-hidden p-2">
+              <AnimatePresence mode="wait" initial={false}>
+                {x && <motion.div key={x.id} initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
+                  <ThemePreview bare theme={x.theme} gameName={GAMES.find((g) => g.id === x.gameId)?.name ?? ''} />
+                </motion.div>}
+              </AnimatePresence>
+            </div>
+          </div>
+          <span className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-[0.6rem] bg-pink text-white border-std border-border px-4 py-1.5 font-display text-xl uppercase whitespace-nowrap -rotate-2" style={{ boxShadow: '0 3px 0 var(--ink)' }}>{t('themes.challengeYours')}</span>
+          <motion.span className="absolute -bottom-6 -right-4 sm:-right-6 w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-sky border-[3.5px] border-border grid place-items-center text-white" style={{ boxShadow: '0 6px 0 var(--ink)' }}
+            animate={reduce ? undefined : { rotate: [-8, 8, -8] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
+            <span className="absolute inset-2 rounded-full border-[3px] border-dashed border-white/70" />
+            <Trophy weight="fill" size={46} />
           </motion.span>
         </div>
       </div>

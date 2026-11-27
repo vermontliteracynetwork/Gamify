@@ -3,18 +3,19 @@ import { CheckCircle, ChartBar, Lightbulb, Prohibit, ShieldCheck, Timer, Trophy,
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import Title from '../ui/Title';
+import { CrayonPowerUp, type PowerId } from '../brand/CrayonKit';
 import { useReducedMotion } from '../ui/useReducedMotion';
 
 // Every game comes loaded (owner, 2026-11-27: "change concept of fair play
 // built in to combine with other great features and have something more
 // visual (maybe show the universal game elements or power ups or place holder
 // pictures where well have real photos) in a better format"). A bento of
-// pictures: the Classic power-ups bobbing (licensed CMHAssets pack, on screen
-// only), a photo slot for a released beta classroom photo (drawn stand-in
+// pictures: her Classic crayon power-ups bobbing, a photo slot for a released beta classroom photo (drawn stand-in
 // until then, docs/photo-brief.md), the pieces every game shares, and the
 // fair-play promises as icon badges with short titles (no paragraphs).
 const INK = '#1d1a33';
-const POWERS = ['shield', 'magnet', 'mystery', 'lightning', 'heart', 'time', 'chest', 'gem'];
+// Her Classic crayon power-ups (owner, 2026-11-27: "show my power up icons for these, the classic crayon style should be applied everywhere").
+const POWERS: PowerId[] = ['shield', 'magnet', 'mystery-box', 'lightning', 'double-points', 'extra-time', 'treasure-chest', 'spin-wheel'];
 const PIECES: [Icon, StringKey, string][] = [
   [Lightbulb, 'features.loaded.piece.hint', 'var(--color-butter)'],
   [ChartBar, 'features.loaded.piece.meter', 'var(--color-mint)'],
@@ -37,17 +38,17 @@ export default function FeatureBento() {
     <section id="fair" aria-labelledby="loaded-title" className="grid gap-6 scroll-mt-24">
       <h2 id="loaded-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.loaded.title')} /></h2>
       <div className="grid gap-5 md:grid-cols-3 md:auto-rows-[minmax(15rem,auto)]">
-        {/* Power-ups: the big Grape tile, pictures bobbing at their own pace. */}
-        <div className={`${tile} md:col-span-2 bg-grape text-white p-6 sm:p-8 grid gap-5 content-between`} style={lift}>
+        {/* Power-ups: the big Orange tile (owner, 2026-11-27: "maybe an orange box instead of the purple"), pictures bobbing at their own pace. */}
+        <div className={`${tile} md:col-span-2 bg-orange text-text p-6 sm:p-8 grid gap-5 content-between`} style={lift}>
           <div className="grid gap-2 max-w-md">
             <h3 className="font-display text-3xl sm:text-4xl leading-none uppercase m-0">{t('features.loaded.powers')}</h3>
             <p className="text-lg font-semibold m-0">{t('features.loaded.powersText')}</p>
           </div>
           <ul className="list-none m-0 p-0 grid grid-cols-4 sm:grid-cols-8 gap-3 items-end" aria-hidden="true">
             {POWERS.map((p, i) => (
-              <motion.li key={p} className="aspect-square rounded-[1rem] bg-paper border-std border-border grid place-items-center p-2" style={{ boxShadow: `0 4px 0 ${INK}`, rotate: (i % 2 ? 4 : -4) }}
+              <motion.li key={p} className="aspect-square rounded-[1rem] bg-paper border-std border-border grid place-items-center p-1" style={{ boxShadow: `0 4px 0 ${INK}`, rotate: (i % 2 ? 4 : -4) }}
                 animate={reduce ? undefined : { y: [0, -8, 0] }} transition={{ duration: 2.2 + (i % 3) * 0.4, repeat: Infinity, ease: 'easeInOut', delay: i * 0.18 }}>
-                <img src={`/classic/powerups/${p}.webp`} alt="" className="w-full h-full object-contain" loading="lazy" />
+                <CrayonPowerUp id={p} size={72} />
               </motion.li>
             ))}
           </ul>
