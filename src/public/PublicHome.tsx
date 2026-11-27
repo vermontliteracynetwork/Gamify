@@ -18,6 +18,7 @@ import CardTape from './scrapbook/CardTape';
 import ThemePreview from '../theme/builder/ThemePreview';
 import { STARTER_THEMES } from '../theme/starters';
 import { BETA } from '../beta/spec';
+import SaleNudge from './SaleNudge';
 import { betaOpen } from '../billing/trial';
 
 // The public home page (development plan Part 3A): what Gamify is, the four
@@ -153,6 +154,7 @@ export default function PublicHome() {
             <Link to="/login?mode=signup" className={buttonClasses('go', 'hover-pop', 'lg')}>{t('public.startFree')}</Link>
             <Link to="/pricing" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.seePlans')}</Link>
           </div>
+          <SaleNudge />
         </section>
       </main>
     </ScrapbookPage>

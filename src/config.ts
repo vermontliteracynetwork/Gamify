@@ -187,7 +187,14 @@ export const THEME_TRIAL_GAME = 'game-show';
 // after the official rules are approved).
 export const CHALLENGE_OPEN = false;
 
+// Pro early access (owner, 2026-11-27: "for pro say all games, and early
+// access"): a new game listed here opens to Pro first; every other plan sees
+// it locked until it is taken off this list. Empty until the owner names the
+// first early-access game (Waiting on you).
+export const EARLY_ACCESS_GAMES: string[] = [];
+export const isEarlyAccess = (gameId: string) => EARLY_ACCESS_GAMES.includes(gameId);
 export function canPlayGame(tier: Tier, gameId: string): boolean {
+  if (isEarlyAccess(gameId)) return tier === 'pro';
   return TIERS[tier].allGames || isFreeGame(gameId);
 }
 

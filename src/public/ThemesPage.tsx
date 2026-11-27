@@ -147,14 +147,20 @@ export function ThemeGallery({ signedIn = false }: { signedIn?: boolean }) {
 function ChallengeSpot() {
   const reduce = useReducedMotion();
   // The frame shows real looks taking turns, so it reads as "a theme like this, by your class".
-  const looks = [...STARTER_THEMES].sort((a, b) => a.order - b.order).slice(0, 5);
+  // Sample makers for now (owner, 2026-11-27: "put a few test names in for
+  // now"); swap for real challenge winners as they come. Every fourth slide is
+  // a question mark: "What will you design?"
+  const looks = [...STARTER_THEMES].sort((a, b) => a.order - b.order).slice(0, 6);
+  const makers = ['Ms. Rivera\'s Class', 'Suzie Smith', 'Room 12 Artists', 'Mr. Okafor\'s 3rd Grade', 'The Kindness Club', 'Ms. Lee\'s Kindergarten'];
+  const slides = looks.flatMap((l, i) => [{ look: l, maker: makers[i % makers.length] }, ...((i + 1) % 3 === 0 ? [{ look: null, maker: '' }] : [])]);
   const [at, setAt] = useState(0);
   useEffect(() => {
-    if (reduce || looks.length < 2) return;
-    const id = window.setInterval(() => setAt((x) => (x + 1) % looks.length), 3000);
+    if (reduce || slides.length < 2) return;
+    const id = window.setInterval(() => setAt((x) => (x + 1) % slides.length), 3000);
     return () => window.clearInterval(id);
-  }, [reduce, looks.length]);
-  const x = looks[at];
+  }, [reduce, slides.length]);
+  const slide = slides[at];
+  const x = slide.look;
   const bits: [number, number, string, number, 'star' | 'dot' | 'tri'][] = [[4, 10, 'var(--color-pink)', -10, 'tri'], [46, 6, 'var(--color-sky)', 0, 'star'], [6, 82, 'var(--color-kelly)', 0, 'dot'], [44, 88, 'var(--color-grape)', 20, 'tri'], [96, 8, 'var(--color-pink)', 0, 'star'], [94, 86, 'var(--color-sky)', 0, 'dot'], [30, 92, 'var(--color-orange)', 0, 'star']];
   return (
     <Link to="/challenge" className="group relative block rounded-[1.9rem] border-[3.5px] border-border bg-lemon overflow-hidden no-underline text-text hover-lift" style={{ boxShadow: '0 8px 0 var(--ink)' }}>
@@ -180,13 +186,19 @@ function ChallengeSpot() {
           <div className="rounded-[1.4rem] border-[3.5px] border-border p-3 sm:p-4" style={{ background: 'linear-gradient(135deg,#ffd76a,#fabe37 45%,#ff9b28)', boxShadow: '0 8px 0 var(--ink)' }}>
             <div className="rounded-[0.9rem] border-[3px] border-border bg-paper overflow-hidden p-2">
               <AnimatePresence mode="wait" initial={false}>
-                {x && <motion.div key={x.id} initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
+                {x ? <motion.div key={`${x.id}-${at}`} initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
                   <ThemePreview bare theme={x.theme} gameName={GAMES.find((g) => g.id === x.gameId)?.name ?? ''} />
-                </motion.div>}
+                </motion.div> : (
+                  <motion.div key={`ask-${at}`} className="aspect-[16/10] grid place-items-center rounded-[0.6rem]" style={{ background: 'radial-gradient(circle at 50% 45%, #fff6cf, #ffd3e6 60%, #ddd6ff)' }}
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+                    <motion.span className="font-display text-[7rem] sm:text-[9rem] leading-none text-[#6a45f0]" style={{ WebkitTextStroke: '3px #1d1a33' }}
+                      animate={reduce ? undefined : { rotate: [-10, 10, -10], y: [0, -10, 0], scale: [1, 1.08, 1] }} transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}>?</motion.span>
+                  </motion.div>
+                )}
               </AnimatePresence>
             </div>
           </div>
-          <span className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-[0.6rem] bg-pink text-white border-std border-border px-4 py-1.5 font-display text-xl uppercase whitespace-nowrap -rotate-2" style={{ boxShadow: '0 3px 0 var(--ink)' }}>{t('themes.challengeYours')}</span>
+          <span className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-[0.6rem] bg-pink text-white border-std border-border px-4 py-1.5 font-display text-xl whitespace-nowrap -rotate-2" style={{ boxShadow: '0 3px 0 var(--ink)' }}>{slide.look ? slide.maker : t('themes.challengeAsk')}</span>
           <motion.span className="absolute -bottom-6 -right-4 sm:-right-6 w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-sky border-[3.5px] border-border grid place-items-center text-white" style={{ boxShadow: '0 6px 0 var(--ink)' }}
             animate={reduce ? undefined : { rotate: [-8, 8, -8] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
             <span className="absolute inset-2 rounded-full border-[3px] border-dashed border-white/70" />

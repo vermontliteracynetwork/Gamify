@@ -20,6 +20,7 @@ import { useReducedMotion } from '../ui/useReducedMotion';
 import PublicFooter from './PublicFooter';
 import ThemeGallery from './ThemeGallery';
 import FeatureBento from './FeatureBento';
+import SaleNudge from './SaleNudge';
 import { useScrapbookGround } from './scrapbook/Shell';
 
 // The Features page, rebuilt as the main selling page (owner, 2026-11-26:
@@ -161,6 +162,7 @@ export default function FeaturesPage() {
             <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop', 'lg')}><ChalkboardTeacher weight="bold" size={22} />{t('public.startFree')}</Link>
             <Link to="/pricing" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.seePlans')}<ArrowRight weight="bold" size={20} /></Link>
           </div>
+          <SaleNudge className="justify-center" />
         </section>
       </main>
       <div className="h-12" />

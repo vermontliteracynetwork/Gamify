@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
-import { BookOpen, Buildings, ChalkboardTeacher, ChartBar, Check, FileText, HandTap, Heart, LockKey, Minus, Rocket, ShieldCheck, Sparkle, Stack, UsersThree, Wrench, X } from '@phosphor-icons/react';
-import { PRICES_USD_PER_YEAR, SCHOOL_SEAT_DISCOUNTS, perMonthUSD } from '../config';
+import { BookOpen, Buildings, ChalkboardTeacher, ChartBar, Check, FileText, HandTap, Heart, Rocket, ShieldCheck, Sparkle, Stack, UsersThree, Wrench, X } from '@phosphor-icons/react';
+import { SCHOOL_SEAT_DISCOUNTS } from '../config';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { buttonClasses } from '../ui/kit';
+import StackedPrice from './StackedPrice';
+import SaleNudge from './SaleNudge';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
 import Accordion from '../ui/Accordion';
@@ -140,7 +142,6 @@ const HS_POSTS = ['siblings-different-grades-one-game', 'game-time-into-homescho
 
 export function HomeschoolPage() {
   useScrapbookGround(); // owner 2026-11-26: this page is scrapbook A
-  const home = perMonthUSD(PRICES_USD_PER_YEAR.homeschool);
   const posts = HS_POSTS.map((slug) => ({ p: POSTS.find((x) => x.slug === slug)!, i: POSTS.findIndex((x) => x.slug === slug) })).filter((x) => x.p);
   return (
     <>
@@ -177,16 +178,16 @@ export function HomeschoolPage() {
               <div key={k} className={`${sbCard} p-6 grid gap-3 content-start ${k === 'homeschool' ? '!bg-butter' : ''}`}>
                 <h3 className="title-bubble m-0 text-[1.875rem] leading-none"><Title text={t(`hs.plan.${k}` as StringKey)} /></h3>
                 <ul className="grid gap-1.5 list-none p-0 m-0">{(k === 'free' ? [1, 2, 3] : [1, 2, 3, 4, 5, 6, 7, 8]).map((n) => <li key={n} className="flex gap-2 font-semibold text-base sm:text-[1.0625rem] leading-snug"><Check weight="bold" size={20} className="shrink-0 mt-0.5 text-success-ink" aria-hidden="true" />{t(`hs.plan.${k}.${n}` as StringKey)}</li>)}</ul>
-                <p className="m-0 font-bold text-lg">{t(`hs.plan.${k}.price` as StringKey, { m: home })}</p>
-                {k === 'homeschool' && <Link to="/login?mode=signup&plan=homeschool" className={buttonClasses('go', 'justify-self-start min-h-12 px-6 hover-pop')}>{t('hs.plan.homeschool.start')}</Link>}
+                {/* Priced like Pricing (owner, 2026-11-27): savings stacked in magenta, Grow Year totals and buttons. */}
+                <div className="pt-3 border-t-2 border-dashed border-border">
+                  {k === 'free'
+                    ? <><p className="font-score text-5xl leading-none m-0">$0</p><p className="font-semibold m-0 mt-1">{t('hs.plan.free.price')}</p></>
+                    : <StackedPrice plan="homeschool" billing="year" />}
+                </div>
+                <Link to={k === 'free' ? '/login?mode=signup' : '/login?mode=signup&plan=homeschool'} className={buttonClasses('go', 'min-h-14 hover-pop font-score !text-2xl')}>{t(k === 'free' ? 'pricing.cta.free' : 'pricing.cta.homeschool')}</Link>
               </div>
             ))}
           </div>
-          <section aria-labelledby="never" className={`${sbCard} p-6 grid gap-3`}>
-            <h3 id="never" className="m-0 font-heading font-bold text-xl sm:text-[1.4375rem] flex items-center gap-2"><LockKey weight="fill" size={26} aria-hidden="true" />{t('hs.neverTitle')}</h3>
-            <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2 list-none p-0 m-0">{[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-2 items-start font-bold text-base sm:text-[1.0625rem]"><Minus weight="bold" size={18} className="shrink-0 mt-1" aria-hidden="true" />{t(`hs.never.${n}` as StringKey)}</li>)}</ul>
-            <Link to="/student-data" className="font-bold justify-self-start">{t('betaPage.promise')}</Link>
-          </section>
         </SbSection>
 
         <FaqTeaser group="homeschool" />
@@ -194,6 +195,7 @@ export function HomeschoolPage() {
         <section className={`${sbCard} !bg-mint p-6 sm:p-8 grid gap-4 justify-items-start`}>
           <SbH2>{t('hs.endTitle')}</SbH2>
           <Link to="/login?mode=signup" className={buttonClasses('go', 'hover-pop', 'lg')}>{t('hs.start')}</Link>
+          <SaleNudge />
         </section>
       </SbMain>
       <PublicFooter />

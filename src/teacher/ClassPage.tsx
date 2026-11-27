@@ -581,7 +581,7 @@ function SetsTab({ classroomId, students, assignments, reload, preset = [] }: { 
 // 2026-10-25). Favorites from the Themes page come first. Leave it empty and
 // students see every theme as usual.
 const MAX_THEME_CHOICES = 10;
-function ThemeChoices({ value, onChange }: { value: string[]; onChange: (ids: string[]) => void }) {
+export function ThemeChoices({ value, onChange }: { value: string[]; onChange: (ids: string[]) => void }) {
   const tier = useTier();
   const { themes: made } = useMadeThemes();
   const { favorites } = useFavoriteThemes();

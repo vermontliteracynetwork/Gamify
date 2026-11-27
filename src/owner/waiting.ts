@@ -8,6 +8,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide'; urgent?: boolean }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'early-access-game', kind: 'decide', added: '2026-11-27', title: 'Pick the first Pro early-access game',
+    why: 'The chart promises Pro "All games, and early access". Early access is built: a game on the list in src/config.ts (EARLY_ACCESS_GAMES) opens to Pro first and shows locked on other plans. The list is empty, so nothing is early yet. The Game Lab games are the natural first picks, but they are on hold until you approve them.',
+    how: 'Say which game opens to Pro first (for example a Game Lab game once approved), and for how long before everyone gets it.' },
   { id: 'beta-photo-release', kind: 'legal', added: '2026-11-27', urgent: true, title: 'Beta photo release form (faces, or hands and work only)',
     why: 'You want real photos of classes playing and making themes for the Pricing carousel and promotion. Faces of children need a signed release from a parent or guardian; hands, the back of a head or the work only need the school and teacher OK. The shot list and rules are in docs/photo-brief.md. The 13 example photos you sent were found online, so they are references only and never ship.',
     how: 'A draft is ready in docs/photo-release.md (parent choice of face, hands and work only, or no; uses; withdrawal; teacher and school part; five questions for the attorney). Send it to the attorney, then say yes to adding it as a beta requirement. Then beta teachers send photos with the release tag.' },

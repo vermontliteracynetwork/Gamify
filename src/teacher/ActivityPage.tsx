@@ -17,6 +17,8 @@ import { Button, PageHeader, Panel } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
 import Title from '../ui/Title';
 import { Choices, CodeBox } from './HostDialog';
+import { ChoiceRow } from '../ui/fields';
+import { ThemeChoices } from './ClassPage';
 
 // Create an activity (teacher, 2026-10-31): question sets, games and
 // assignments come together as one "Activity". Step by step: who it is for,
@@ -54,6 +56,11 @@ export default function ActivityPage() {
   const [together, setTogether] = useState<'compete' | 'together'>('compete');
   const [setId, setSetId] = useState<string[]>(() => (query.get('set') ? [query.get('set')!] : []));
   const [board, setBoard] = useState<string[]>([]);
+  // Homework choice (owner, 2026-11-27): one game and its look, one game with a
+  // few themes students pick from, or any game and any theme (autonomy).
+  const [hwChoice, setHwChoice] = useState<'one' | 'themes' | 'any'>('one');
+  const [hwThemes, setHwThemes] = useState<string[]>([]);
+  const anyGame = how === 'homework' && hwChoice === 'any';
   // How long they play, and a score that ends the game (teacher, 2026-10-31).
   const [minutes, setMinutes] = useState(0);
   const [goal, setGoal] = useState(0);
@@ -79,21 +86,27 @@ export default function ActivityPage() {
   // two-player games played against the computer (teacher, 2026-10-31).
   const ownDevice = (g: (typeof GAMES)[number]) => g.modes.includes('solo') || g.modes.includes('versus');
   const fits = (g: (typeof GAMES)[number]) => !how || (how === 'each' || how === 'board' ? ownDevice(g) : g.modes.includes(HOWS.find((h) => h.id === how)!.mode!));
-  const ready = [true, !!how && !locked(how), how === 'board' ? board.length > 1 : !!game, !!set, true][step];
+  const ready = [true, !!how && !locked(how) && !(how === 'homework' && hwChoice !== 'one' && !classId) && !(how === 'homework' && hwChoice === 'themes' && hwThemes.length < 2), how === 'board' ? board.length > 1 : anyGame || !!game, !!set, true][step];
   const showClasses = TIERS[tier].hasClasses && classes.length > 0;
 
   async function finish() {
-    if ((!game && how !== 'board') || !set) return;
+    if ((!game && how !== 'board' && !anyGame) || !set) return;
     const shared = how === 'each' || how === 'board';
     const limits = { ...(minutes ? (shared ? { endAt: Date.now() + minutes * 60000 } : { minutes }) : {}), ...(goal ? { goal } : {}) };
     if (how === 'board') { setCode(await makeLobbyCode({ classId, plan: {}, board: { gameIds: board, setId: set.id } }, limits)); return; }
+    // Any game, any theme: a choice board of every game students can play on their own, due like homework.
+    if (anyGame) {
+      setCode(await makeLobbyCode({ classId, plan: {}, board: { gameIds: GAMES.filter(ownDevice).filter((g) => canPlayGame(tier, g.id)).map((g) => g.id), setId: set.id } }, { ...limits, due }));
+      await data.saveAssignment({ id: newId('asg'), classroomId: classId, setId: set.id, starred: false, endsOn: due });
+      return;
+    }
     if (!game) return;
     if (how === 'screen') { navigate(`/games/${game.id}?set=${set.id}&teams=${teams}`); return; }
     if (how === 'each') { setCode(await makeLobbyCode({ classId, all: { gameId: game.id, setId: set.id }, plan }, limits)); return; }
     if (how === 'lobby') { navigate(`/teacher/live/${(await makeGameCode(game.id, set.id, 'live')).code}?mode=${together}`); return; }
     const made = await makeGameCode(game.id, set.id, how === 'pairs' ? 'versus' : 'play', how === 'homework' ? due : undefined, limits);
     if (how === 'homework' && classId) {
-      await data.saveAssignment({ id: newId('asg'), classroomId: classId, setId: set.id, starred: false, endsOn: due });
+      await data.saveAssignment({ id: newId('asg'), classroomId: classId, setId: set.id, starred: false, endsOn: due, ...(hwChoice === 'themes' && hwThemes.length ? { themeIds: hwThemes } : {}) });
     }
     setCode(made);
   }
@@ -197,7 +210,8 @@ export default function ActivityPage() {
           </div>
         )}
 
-        {STEPS[step] === 'game' && (
+        {STEPS[step] === 'game' && anyGame && <Panel><p className="font-bold text-lg m-0">{t('activity.hw.anyNote')}</p></Panel>}
+        {STEPS[step] === 'game' && !anyGame && (
           <div role={how === 'board' ? 'group' : 'radiogroup'} aria-label={t(how === 'board' ? 'activity.boardPick' : 'activity.q.game')} className="grid gap-3">
             {how === 'board' && <p className="font-bold">{t('activity.boardPick')}</p>}
             {how === 'each' && <p className="font-bold">{t('activity.eachPick')}</p>}
@@ -251,6 +265,14 @@ export default function ActivityPage() {
                   <input type="number" min={0} step={10} value={goal || ''} placeholder={t('activity.goalNone')} onChange={(e) => setGoal(Math.max(0, Number(e.target.value) || 0))} className="min-h-11 px-3 rounded-input border-std border-border font-bold bg-surface" />
                   <span className="text-sm font-semibold text-muted">{t('activity.goalHint')}</span>
                 </label>
+              </div>
+            )}
+            {how === 'homework' && lim.homework && (
+              <div className="grid gap-3">
+                <ChoiceRow label={t('activity.hw.choice')} value={hwChoice} onChange={setHwChoice}
+                  options={[{ value: 'one', label: t('activity.hw.one') }, { value: 'themes', label: t('activity.hw.themes') }, { value: 'any', label: t('activity.hw.any') }]} />
+                {hwChoice !== 'one' && !classId && <p className="text-sm font-bold" role="status">{t('activity.hw.needClass')}</p>}
+                {hwChoice === 'themes' && <ThemeChoices value={hwThemes} onChange={setHwThemes} />}
               </div>
             )}
             {how === 'homework' && (

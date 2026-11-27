@@ -14,7 +14,8 @@ import type { Tier } from '../config';
 export interface GameCode { code: string; gameId: string; setId: string; createdAt: string; live?: boolean; versus?: boolean; mirror?: boolean; design?: boolean; rosterClass?: string; cloud?: boolean; due?: string; lobby?: ClassLobby; minutes?: number; endAt?: number; goal?: number; plan?: Tier }
 // The teacher's clock (2026-10-31): `minutes` each student plays, or
 // `endAt` (ms) when every game ends together; `goal` ends a game at a score.
-export interface PlayLimits { minutes?: number; endAt?: number; goal?: number }
+// `due`: a choice board sent as homework (owner, 2026-11-27) lasts until its due date.
+export interface PlayLimits { minutes?: number; endAt?: number; goal?: number; due?: string }
 
 // Pro class lobby (teacher, 2026-10-31): one fresh code for a class; each
 // student (or group) gets their own game and set, or picks from a choice
