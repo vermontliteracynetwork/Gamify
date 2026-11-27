@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'beta-photo-release', kind: 'legal', added: '2026-11-27', title: 'Beta photo release form (faces, or hands and work only)',
+    why: 'You want real photos of classes playing and making themes for the Pricing carousel and promotion. Faces of children need a signed release from a parent or guardian; hands, the back of a head or the work only need the school and teacher OK. The shot list and rules are in docs/photo-brief.md. The 13 example photos you sent were found online, so they are references only and never ship.',
+    how: 'Ask the attorney for a photo and video release (web, social and ads use, how to withdraw) and say yes to adding it as a beta requirement. Then beta teachers send photos with the release tag.' },
   { id: 'free-cleanup', kind: 'setup', added: '2026-11-26', title: 'Turn on the nightly delete of Free answers (run 0018)',
     why: 'You asked for Free data to be deleted nightly. On each device it already happens. In the cloud, a nightly job deletes every Free teacher\'s answers from before today at 3:00 am Eastern, but it needs the pg_cron extension and this migration run once.',
     how: 'Supabase dashboard: Database, Extensions, turn on pg_cron. Then SQL editor: run supabase/migrations/0018_free_history_cleanup.sql.' },

@@ -126,8 +126,9 @@ export function billingSavings(tier: Exclude<Tier, 'free'>, b: Billing): number 
 // the plan then renews at the standard price for the same length. Beta testers get their own offer instead (src/beta/spec.ts); the
 // two never stack. Applied with a Stripe promotion code once Stripe is set up.
 export const LAUNCH_OFFER = {
-  name: 'Founding Subscriber',
-  code: 'FOUNDING10',
+  // Renamed from Founding Subscriber (owner, 2026-11-27: "no subscriber, think more cute about like first gamers sale").
+  name: 'Player One Sale',
+  code: 'PLAYERONE10',
   discount: 0.1,
   firstTermOnly: true,
   endsBefore: '2027-01-01',

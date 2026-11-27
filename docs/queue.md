@@ -6,6 +6,12 @@ built, checked in a browser at every device size, and pushed. The live site is
 not rebuilt to the new direction until she asks for the push (preview branch
 only, never main without her approval).
 
+Always active (owner, 2026-11-27: "find and carry over any exisiting queue list items from other gamify chats here. always show an active queue"): every Gamify chat reads this file first, carries over open items from other chats, and every final report shows the open items.
+
+## Active now
+
+- 40 (audit against the design references) and K (below).
+
 Source messages: 2026-11-24 (owner, two messages in the marketing-team session,
 plus the hand-off from the "Game recreations" session).
 
@@ -219,3 +225,37 @@ landing page layouts, copy Stripe. For micro interactions, copy Framer."
 47. [x] **Home hero cards larger and spaced out.**
 48. [x] **Home How It Works:** no tape; Step chips in Grow Year.
 49. [x] **Compare Every Feature** doc table updated to her plan rules.
+
+## K. Owner requests, 2026-11-27
+
+Her words: "1) improve this banner so its visual and more promotional. i dont
+want it to be called founding subscriber. no subscriber, think more cute about
+like first gamers sale or something. i want it to be larger, use more of
+bright colors from our pallette. 2) remove "Nothing is ever deleted" label from
+everywhere. 3) ... the goal is that we will apply psychology to get people to
+upgrade and not state why people upgrade. this should be something visual
+maybe a gallary carosel where we can show people/students making themes and
+getting engagement from their students by participating in the game 4) ...
+improve the layout of the question set section to be more like this. 5) ...
+make the bowling game lanes like this. 6) ... these are the kind of photos i
+want in the carosel and promotional otherwise."
+
+50. [ ] **Player One Sale banner** (renamed from Founding Subscriber, code
+    PLAYERONE10): big Lemon card, Grape 10% off sticker, Pink name chip,
+    confetti, days-left chip, renewal line kept. Built; to check in a browser.
+51. [x] **"Nothing is ever deleted" removed** from pricing chips, the compare
+    chart, the upgrade box, the beta page and the /brand mockups.
+52. [ ] **"Made by your class" carousel** replaces "Themes are why teachers
+    upgrade" on Pricing: draw it, snap it in, play it, pick the next one.
+    Drawn stand-ins until released beta photos arrive. Built; to check.
+53. [ ] **Question sets as a card wall** (her screenshots): My sets and the
+    library as masonry picture cards, a headed search panel at the left of the
+    library, and the ready-made set preview as a left panel with big buttons
+    plus every question as a picture card. Built; to check.
+54. [ ] **Bowling lane like her reference**: honey wood lane, thick Orange
+    gutter rails, an Orange pin-deck arch, a Grape squiggle carpet, five
+    colored aim zones near the foul line (no numbers on them, Golden Rule:
+    to confirm). Built; to check on every device and with the Classic Art
+    Director.
+55. [ ] **Beta photos**: shot list and release rules in docs/photo-brief.md;
+    the beta application needs the photo release step (Waiting on you).

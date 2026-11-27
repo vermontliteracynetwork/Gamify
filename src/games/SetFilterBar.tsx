@@ -8,7 +8,7 @@ import { t } from '../i18n';
 // Filters for question sets: search titles and tags, subject, grade, and a
 // Common Core standard code. Typing in search offers matching tags from the
 // sets on hand; a picked tag becomes a filter chip (teacher, 2026-10-25).
-export default function SetFilterBar({ value, onChange, sets = [], compact = false, chips = false }: { value: SetFilter; onChange: (f: SetFilter) => void; sets?: Pick<QuestionSet, 'tags'>[]; compact?: boolean; chips?: boolean }) {
+export default function SetFilterBar({ value, onChange, sets = [], compact = false, chips = false, stacked = false }: { value: SetFilter; onChange: (f: SetFilter) => void; sets?: Pick<QuestionSet, 'tags'>[]; compact?: boolean; chips?: boolean; stacked?: boolean }) {
   // compact: small fields so the cards stay the main view (teacher, 2026-11-06).
   const field = compact ? 'min-h-8 tap px-2 rounded-input border-thin border-border bg-surface font-bold text-xs' : 'min-h-11 px-3 rounded-input border-std border-border bg-surface font-bold';
   const chosen = value.tags ?? [];
@@ -23,8 +23,9 @@ export default function SetFilterBar({ value, onChange, sets = [], compact = fal
   return (
     <div className="@container grid gap-2">
     {/* Narrow spaces put search on its own row, so no word is cut short. */}
-    <div className="grid gap-2 grid-cols-3 @3xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
-      <label className="relative col-span-3 @3xl:col-span-1">
+    {/* stacked: one field a row, for a side panel (the question set library). */}
+    <div className={`grid gap-2 ${stacked ? 'grid-cols-1' : 'grid-cols-3 @3xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]'}`}>
+      <label className={`relative ${stacked ? '' : 'col-span-3 @3xl:col-span-1'}`}>
         <MagnifyingGlass weight="bold" size={compact ? 16 : 20} className="absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
         <input type="search" value={value.search ?? ''} onChange={(e) => onChange({ ...value, search: e.target.value })} placeholder={t('filter.search')} aria-label={t('filter.search')}
           className={`w-full ${compact ? 'pl-8' : 'pl-10'} ${field}`} />

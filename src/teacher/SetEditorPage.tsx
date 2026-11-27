@@ -21,6 +21,7 @@ import Title from '../ui/Title';
 import CaptionedImage from '../ui/CaptionedImage';
 import MediaSearch from '../ui/MediaSearch';
 import QuestionVoice from './QuestionVoice';
+import SetPreview from './SetPreview';
 
 // Question set editor (approved teacher portal 6b, 2026-11-25): three
 // columns, one job each. The question list with how each question played on
@@ -56,6 +57,8 @@ export default function SetEditorPage({ library: isLibrary = false }: { library?
   if (loaded === null || !set) {
     return <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-10"><Panel><p className="font-bold">{t('editor.notFound')}</p></Panel></main>;
   }
+  // Ready-made sets open as a picture-card preview (owner, 2026-11-27).
+  if (isLibrary) return <SetPreview set={set} atLimit={atLimit} note={t('editor.readOnly')} />;
 
   function update(next: QuestionSet) {
     setSet(next);

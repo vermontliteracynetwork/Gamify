@@ -88,7 +88,6 @@ export function compareGroups(billing: Billing): Group[] {
       row('cmp.billing', 'cmp.billing.what', (x) => (x === 'free' ? t('cmp.billing.free') : t('cmp.billing.paid'))),
       // The launch sale lives in the Marketing campaigns, not the feature chart (owner, 2026-11-26).
       row('cmp.cancel', 'cmp.cancel.what', (x) => (x === 'free' ? t('cmp.cancel.free') : true)),
-      row('cmp.keep', 'cmp.keep.what', (x) => x !== 'free'),
       row('cmp.ads', 'cmp.ads.what', all),
     ] },
   ];

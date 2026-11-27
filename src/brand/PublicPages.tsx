@@ -408,7 +408,7 @@ const FAQ: [string, string][] = [
   ['My students are in high school; game sites feel babyish.', 'Themes for any age, and students can design the look themselves.'],
   ['I\'d be paying out of my own pocket.', `Plus is $${perMonth(PRICES_USD_PER_YEAR.plus)} a month, billed yearly, and a one-minute quote you can forward to your principal so the school pays.`],
   ['What if it breaks in front of 25 kids?', 'Every game is tested on iPads, laptops and smart boards, and fits the screen with no scrolling.'],
-  ['What happens to my work if my plan changes?', 'Nothing is deleted. The account moves to Free; anything past the Free limits stays readable and comes back in full with an upgrade.'],
+  ['What happens to my work if my plan changes?', 'The account moves to Free; anything past the Free limits stays readable and comes back in full with an upgrade.'],
   ['Can a school, district or PTO pay?', 'Yes. Request a quote here and it arrives by email as a PDF. Purchase orders (yearly, prepaid, net 30) and cards are accepted.'],
 ];
 function Pricing({ w }: W) {
@@ -418,7 +418,7 @@ function Pricing({ w }: W) {
       <Section w={w}>
         <PageHead w={w} title="Plans and Pricing" sub="Start free and grow when your class does. Every plan turns your questions into games your class asks for; unlock every game and your class's own designs whenever you are ready." />
         {/* risk reversal, before the numbers */}
-        <div className={`flex gap-3 justify-start ${ph ? 'flex-col' : 'flex-wrap'}`}>{['No card needed to start', 'Cancel any time', 'Nothing is ever deleted', 'Accessibility free on every plan'].map((x) => <span key={x} className="inline-flex items-center justify-center gap-2 rounded-full px-5 font-bold text-[17px]" style={{ minHeight: 48, background: '#fff', border: `2.5px solid ${I}` }}><ShieldCheck weight="bold" size={18} />{x}</span>)}</div>
+        <div className={`flex gap-3 justify-start ${ph ? 'flex-col' : 'flex-wrap'}`}>{['No card needed to start', 'Cancel any time', 'Accessibility free on every plan'].map((x) => <span key={x} className="inline-flex items-center justify-center gap-2 rounded-full px-5 font-bold text-[17px]" style={{ minHeight: 48, background: '#fff', border: `2.5px solid ${I}` }}><ShieldCheck weight="bold" size={18} />{x}</span>)}</div>
         <span className="text-left font-semibold" style={{ fontSize: ph ? 16 : 17 }}>Paid plans bill once a year, so there is no monthly charge to track. Prices are shown per month.</span>
         <div className={`grid gap-5 ${ph ? '' : 'grid-cols-3 items-end'}`}>
           {PLANS.map((p) => (

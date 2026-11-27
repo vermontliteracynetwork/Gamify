@@ -45,7 +45,7 @@ import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { bowlingManifest } from './manifest';
 import { PIN_OUTLINE } from '../../theme/builder/shapes';
 import { cpuPlan, fullRack, PIN_SPOTS, PIN_XY, rollPoints, shakePins, simulateRoll, toView, type SimResult } from './lane';
-import { alley, BALL_COLORS, ballUrl, BowlCards, C, ClassicPin, FlatBall, GY, INK, WallConfetti, type FrameMark } from './alley';
+import { alley, BALL_COLORS, ballUrl, BowlCards, C, ClassicPin, FlatBall, GY, INK, AlleyDefs, PinDeck, ZONES, type FrameMark } from './alley';
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 type Step = 'question' | 'aim' | 'spin' | 'roll' | 'result';
@@ -56,7 +56,9 @@ type Step = 'question' | 'aim' | 'spin' | 'roll' | 'result';
 // leaves out stay Classic.
 const BALLS = 10;
 // Boards down the lane (fractions of the half width), fixed so they never jump.
-const BOARDS = [-0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75];
+const BOARDS = [-0.84, -0.68, -0.52, -0.36, -0.2, -0.04, 0.12, 0.28, 0.44, 0.6, 0.76];
+// The colored aim zones near the foul line (owner's reference, 2026-11-27): five cells across the lane.
+const ZONE_D = [0.09, 0.19] as const;
 
 // Bowling (launch roster, Stage 7): a right answer earns a roll. Tap a
 // lane and the ball rolls into ten pins. Two rolls a frame;
@@ -401,6 +403,9 @@ export default function Bowling() {
     : <g transform={`scale(${k * 1.45} ${k})`}><ClassicPin fill={pinColor} k={k} /></g>;
   const meterLabel = t('sb.frame', { n: Math.min(myFrame + 1, setup.frames), total: setup.frames });
   const foulY = A.near + (box.h - A.near) * 0.5;
+  // The pin deck arch stays clear of the meter strip on top.
+  const deckH = Math.max(24, Math.min(A.top - (box.w < 640 ? 112 : 70), hN * 0.5));
+  const zoneOn = Math.max(0, Math.min(4, Math.floor(((aim * 1.12) / 1.25 + 1) / 0.4)));
   const bannerTop = portrait ? A.top + (A.near - A.top) * 0.32 : box.h * 0.4;
 
   return (
@@ -444,22 +449,34 @@ export default function Bowling() {
           <svg viewBox={`0 0 ${box.w} ${box.h}`} className="absolute inset-0 w-full h-full" role="img" aria-label={t('sb.board', { count: standing.filter(Boolean).length })}>
             <defs>
               <clipPath id="sb-pin-shape"><path d={PIN_OUTLINE} /></clipPath>
+              {classic && <AlleyDefs calm={!!settings.calm} />}
               {ballArt && <pattern id="sb-ball-art" patternContentUnits="objectBoundingBox" width="1" height="1"><image href={ballArt} width="1" height="1" preserveAspectRatio="xMidYMid slice" /></pattern>}
             </defs>
             <g style={{ transformOrigin: `${A.cx}px ${headY}px`, transform: sim?.zoom ? 'scale(1.14)' : 'scale(1)', transition: still ? 'none' : 'transform 0.45s ease-out' }}>
-              {/* The alley wall: cream with cut-paper confetti (Classic); the floor is the stage color. */}
-              {!bgArt && <rect x={-40} y={-40} width={box.w + 80} height={A.top + 40} fill={classic ? C.paper : theme.colors.surface} />}
-              {!bgArt && classic && settings.backgrounds !== 'plain' && <WallConfetti w={box.w} h={A.top} calm={!!settings.calm} />}
-              {/* Gutters, then the warm lane with its boards. */}
-              {[-1, 1].map((sd) => <path key={sd} d={`M${A.cx + sd * hwTop} ${A.top} L${A.cx + sd * (hwTop + gut(hwTop))} ${A.top} L${A.cx + sd * (hwBot + gut(hwBot))} ${box.h + 4} L${A.cx + sd * hwBot} ${box.h + 4} Z`} fill={C.lavender} stroke={INK} strokeWidth={4} strokeLinejoin="round" />)}
-              <path d={`M${A.cx - hwTop} ${A.top} L${A.cx + hwTop} ${A.top} L${A.cx + hwBot} ${box.h + 4} L${A.cx - hwBot} ${box.h + 4} Z`} fill={laneColor} stroke={INK} strokeWidth={4} strokeLinejoin="round" />
-              {BOARDS.map((u) => <path key={u} d={`M${A.cx + u * hwTop} ${A.top} L${A.cx + u * hwBot} ${box.h}`} stroke={C.orange} strokeWidth={2} opacity={0.55} />)}
-              {/* Aim arrows in a V and a row of dots, like real lane marks, drawn our way. */}
-              {[-0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6].map((u) => { const d = 0.3 - Math.abs(u) * 0.12; const x = A.cx + u * A.HW(d), y = A.Y(d), s = A.HW(d) * 0.06; return <path key={u} d={`M${x} ${y - s * 1.6} L${x + s} ${y + s} L${x - s} ${y + s} Z`} fill={C.orange} stroke={INK} strokeWidth={2} strokeLinejoin="round" />; })}
-              {[-0.5, -0.25, 0, 0.25, 0.5].map((u) => <circle key={u} cx={A.cx + u * A.HW(0.1)} cy={A.Y(0.1)} r={A.HW(0.1) * 0.025} fill={C.orange} stroke={INK} strokeWidth={1.5} />)}
+              {/* Classic: the bright alley (owner's reference, 2026-11-27): a Grape carpet of
+                  squiggles, Orange gutter rails, a honey wood lane and the pin deck arch.
+                  Other themes keep their own wall, rail and lane colors. */}
+              {!bgArt && !classic && <rect x={-40} y={-40} width={box.w + 80} height={A.top + 40} fill={theme.colors.surface} />}
+              {!bgArt && classic && <rect x={-80} y={-80} width={box.w + 160} height={box.h + 160} fill={settings.backgrounds === 'plain' ? '#4a32b8' : 'url(#sb-carpet)'} />}
+              {!bgArt && classic && <PinDeck cx={A.cx} top={A.top} hw={hwTop + gut(hwTop)} h={deckH} />}
+              {[-1, 1].map((sd) => <path key={sd} d={`M${A.cx + sd * hwTop} ${A.top} L${A.cx + sd * (hwTop + gut(hwTop))} ${A.top} L${A.cx + sd * (hwBot + gut(hwBot))} ${box.h + 4} L${A.cx + sd * hwBot} ${box.h + 4} Z`} fill={classic ? C.orange : C.lavender} stroke={INK} strokeWidth={4} strokeLinejoin="round" />)}
+              {/* The rounded top of each gutter rail: a lighter stripe down its middle. */}
+              {classic && [-1, 1].map((sd) => <path key={sd} d={`M${A.cx + sd * (hwTop + gut(hwTop) * 0.5)} ${A.top} L${A.cx + sd * (hwBot + gut(hwBot) * 0.5)} ${box.h + 4}`} stroke="#ffc27a" strokeWidth={Math.max(4, gut(hwBot) * 0.28)} strokeLinecap="round" opacity={0.9} />)}
+              <path d={`M${A.cx - hwTop} ${A.top} L${A.cx + hwTop} ${A.top} L${A.cx + hwBot} ${box.h + 4} L${A.cx - hwBot} ${box.h + 4} Z`} fill={classic ? 'url(#sb-wood)' : laneColor} stroke={INK} strokeWidth={4} strokeLinejoin="round" />
+              {BOARDS.map((u) => <path key={u} d={`M${A.cx + u * hwTop} ${A.top} L${A.cx + u * hwBot} ${box.h}`} stroke={classic ? '#c98444' : C.orange} strokeWidth={classic ? 1.5 : 2} opacity={classic ? 0.45 : 0.55} />)}
+              {classic && <path d={`M${A.cx - hwTop} ${A.top} L${A.cx + hwTop} ${A.top} L${A.cx + hwBot} ${box.h + 4} L${A.cx - hwBot} ${box.h + 4} Z`} fill="url(#sb-shine)" />}
+              {/* Aim arrows in a V, like real lane marks, drawn our way. */}
+              {[-0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6].map((u) => { const d = 0.36 - Math.abs(u) * 0.12; const x = A.cx + u * A.HW(d), y = A.Y(d), s = A.HW(d) * 0.055; return <path key={u} d={`M${x} ${y - s * 1.6} L${x + s} ${y + s} L${x - s} ${y + s} Z`} fill={classic ? '#b5652a' : C.orange} stroke={INK} strokeWidth={2} strokeLinejoin="round" />; })}
+              {/* Five colored aim zones; the one the ball is aimed at lights up. */}
+              {ZONES.map((c, i) => {
+                const u0 = -1 + i * 0.4, u1 = u0 + 0.4, [d0, d1] = ZONE_D;
+                const on = canAim && zoneOn === i;
+                const pts = `${A.cx + u0 * A.HW(d0)},${A.Y(d0)} ${A.cx + u1 * A.HW(d0)},${A.Y(d0)} ${A.cx + u1 * A.HW(d1)},${A.Y(d1)} ${A.cx + u0 * A.HW(d1)},${A.Y(d1)}`;
+                return <polygon key={i} points={pts} fill={c} stroke={on ? '#fff' : INK} strokeWidth={on ? 5 : 2.5} strokeLinejoin="round" opacity={canAim && !on ? 0.78 : 1} style={{ transition: still ? 'none' : 'opacity 0.15s, stroke-width 0.15s' }} />;
+              })}
               <path d={`M${A.cx - A.edgeAt(foulY)} ${foulY} H${A.cx + A.edgeAt(foulY)}`} stroke={INK} strokeWidth={4} strokeLinecap="round" />
-              {/* The Lemon rail across the back wall (Classic). */}
-              {!bgArt && <rect x={-40} y={A.top - Math.max(7, box.h * 0.016)} width={box.w + 80} height={Math.max(10, box.h * 0.022)} fill={classic ? C.lemon : theme.colors.accent} stroke={INK} strokeWidth={3.5} />}
+              {/* Other themes keep their rail across the back wall. */}
+              {!bgArt && !classic && <rect x={-40} y={A.top - Math.max(7, box.h * 0.016)} width={box.w + 80} height={Math.max(10, box.h * 0.022)} fill={theme.colors.accent} stroke={INK} strokeWidth={3.5} />}
               {/* Bumper rails pop up when the power-up is on. */}
               {armed.includes('bumpers') && [-1, 1].map((sd) => <path key={sd} d={`M${A.cx + sd * (hwTop + gut(hwTop) * 0.5)} ${A.top} L${A.cx + sd * (hwBot + gut(hwBot) * 0.5)} ${box.h}`} stroke={C.teal} strokeWidth={Math.max(6, hN * 0.05)} strokeLinecap="round" className={still ? '' : 'sb-pop'} />)}
               {canAim && <>

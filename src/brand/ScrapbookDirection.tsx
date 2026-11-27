@@ -298,7 +298,7 @@ function Pricing({ w }: W) {
         <div className="flex flex-wrap gap-2 p-1.5 rounded-full justify-self-start" role="tablist" style={{ background: '#ffffff', border: `2.5px solid ${I}` }}>
           {BILLINGS.map((b) => <span key={b.id} role="tab" aria-selected={b.id === 'year'} className="px-4 rounded-full font-bold inline-flex items-center" style={{ minHeight: 42, fontSize: p ? 15 : 17, ...(b.id === 'year' ? { background: PP.butter, border: `2px solid ${I}` } : {}) }}>{b.id === 'month' ? t('pricing.billing.month') : t(`pricing.billing.${b.id}` as StringKey, { off: billingSavings('plus', b.id) })}</span>)}
         </div>
-        <div className={`flex gap-3 ${p ? 'flex-col' : 'flex-wrap'}`}>{(['pricing.trust.card', 'pricing.trust.cancel', 'pricing.trust.keep', 'pricing.trust.access'] as StringKey[]).map((k) => <span key={k} className="inline-flex items-center gap-2 font-bold text-[17px] px-4 py-2 rounded-full bg-white" style={{ border: `2px solid ${I}` }}><Check weight="bold" size={18} color={PP.kelly} />{t(k)}</span>)}</div>
+        <div className={`flex gap-3 ${p ? 'flex-col' : 'flex-wrap'}`}>{(['pricing.trust.card', 'pricing.trust.cancel', 'pricing.trust.access'] as StringKey[]).map((k) => <span key={k} className="inline-flex items-center gap-2 font-bold text-[17px] px-4 py-2 rounded-full bg-white" style={{ border: `2px solid ${I}` }}><Check weight="bold" size={18} color={PP.kelly} />{t(k)}</span>)}</div>
         <div style={{ ...grid(w, 3), alignItems: 'stretch', paddingTop: 8 }}>
           {tiers.map((x, i) => {
             const best = x === 'plus';

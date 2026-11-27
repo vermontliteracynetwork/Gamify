@@ -157,3 +157,65 @@ export function BowlCards({ players, now, sheet, frames, frame, compact, row, pl
     </aside>
   );
 }
+
+// The bright alley (owner, 2026-11-27, her reference image: "make the bowling
+// game lanes like this"): a honey wood lane between thick Orange gutter rails,
+// a pin deck arch at the far end, a Grape carpet of brand-color squiggles on
+// both sides, and a band of colored aim zones near the foul line. Drawn from
+// scratch in the brand palette; nothing traced or copied.
+export const CARPET = '#4a32b8';
+export const DECK = '#2b1f63';
+export const ZONES = [C.grape, C.orange, C.teal, C.kelly, C.pink];
+export function AlleyDefs({ calm }: { calm: boolean }) {
+  const o = calm ? 0.35 : 0.9;
+  return (
+    <>
+      <linearGradient id="sb-wood" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#f9d9a6" /><stop offset="0.55" stopColor="#f2bd78" /><stop offset="1" stopColor="#e7a258" />
+      </linearGradient>
+      <radialGradient id="sb-shine" cx="0.5" cy="0.15" r="0.6">
+        <stop offset="0" stopColor="#fff" stopOpacity="0.45" /><stop offset="1" stopColor="#fff" stopOpacity="0" />
+      </radialGradient>
+      <radialGradient id="sb-deck-glow" cx="0.5" cy="0.9" r="0.7">
+        <stop offset="0" stopColor={C.lavender} stopOpacity="0.55" /><stop offset="1" stopColor={C.lavender} stopOpacity="0" />
+      </radialGradient>
+      {/* Squiggles, rings, sprinkles and triangles on a fixed tile, so the carpet never jumps. */}
+      <pattern id="sb-carpet" width="180" height="180" patternUnits="userSpaceOnUse">
+        <rect width="180" height="180" fill={CARPET} />
+        <g fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="6" opacity={o}>
+          <path d="M14 30 q10 -14 20 0 t20 0 t20 0" stroke={C.lime} />
+          <path d="M104 118 q10 -14 20 0 t20 0 t20 0" stroke={C.pink} />
+          <path d="M120 22 q14 8 4 20 t4 22" stroke="#bfdff3" />
+          <path d="M22 116 q14 8 4 20 t4 22" stroke={C.butter} />
+          <circle cx="78" cy="78" r="9" stroke={C.teal} />
+          <circle cx="160" cy="170" r="6" stroke={C.lime} />
+          <path d="M60 150 l8 -14 l8 14 z" stroke={C.lemon} />
+          <path d="M150 70 l8 -14 l8 14 z" stroke={C.sky} />
+        </g>
+        <g opacity={o}>
+          {[[44, 62, C.pink], [96, 40, C.butter], [138, 96, C.lime], [30, 92, C.sky], [92, 170, C.teal], [170, 128, C.lemon]].map(([x, y, c], i) => (
+            <rect key={i} x={Number(x) - 7} y={Number(y) - 2.5} width="14" height="5" rx="2.5" fill={String(c)} transform={`rotate(${i * 37} ${x} ${y})`} />
+          ))}
+        </g>
+      </pattern>
+    </>
+  );
+}
+
+// The pin deck: an Orange arch around the far end of the lane, dark inside
+// so the white pins pop, with a soft glow behind them.
+export function PinDeck({ cx, top, hw, h }: { cx: number; top: number; hw: number; h: number }) {
+  const t = Math.max(8, hw * 0.16);
+  const r = Math.min(h * 0.6, hw * 0.45);
+  const outer = `M${cx - hw - t} ${top + 2} V${top - h + r} Q${cx - hw - t} ${top - h} ${cx - hw - t + r} ${top - h} H${cx + hw + t - r} Q${cx + hw + t} ${top - h} ${cx + hw + t} ${top - h + r} V${top + 2} Z`;
+  const ri = Math.max(4, r - t);
+  const inner = `M${cx - hw} ${top + 2} V${top - h + t + ri} Q${cx - hw} ${top - h + t} ${cx - hw + ri} ${top - h + t} H${cx + hw - ri} Q${cx + hw} ${top - h + t} ${cx + hw} ${top - h + t + ri} V${top + 2} Z`;
+  return (
+    <g aria-hidden="true">
+      <path d={outer} fill={C.orange} stroke={INK} strokeWidth={4} strokeLinejoin="round" />
+      <path d={`M${cx - hw - t * 0.55} ${top - h + r} Q${cx - hw - t * 0.55} ${top - h + t * 0.45} ${cx - hw - t + r} ${top - h + t * 0.45} H${cx + hw + t - r}`} stroke="#ffc27a" strokeWidth={Math.max(3, t * 0.25)} fill="none" strokeLinecap="round" />
+      <path d={inner} fill={DECK} stroke={INK} strokeWidth={3.5} strokeLinejoin="round" />
+      <rect x={cx - hw} y={top - h + t} width={hw * 2} height={h - t} fill="url(#sb-deck-glow)" />
+    </g>
+  );
+}

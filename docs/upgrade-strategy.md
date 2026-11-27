@@ -124,7 +124,7 @@ Want to Start?"**, standard Gamify look, three choices in this order:
 
 1. **Plus** (the bright card): its four headline lines (from `upgrade.plus.1-4`), the
    price for the length picked (monthly / 3 / 6 / 12, yearly first as on Pricing), the
-   **Founding Subscriber** line while it is true ("an extra 10% off your first term until
+   **Player One Sale** line while it is true ("an extra 10% off your first term until
    January 1, 2027; then it renews at the standard price for the same length until you
    cancel"), and **Get Plus** (Grape).
 2. **Pro** beside it, same layout, quieter card.
@@ -155,7 +155,7 @@ you approve (`beta-code`, 10 uses). The real risk is **approved testers who go q
 | 3. **Show-us-one-game gate** | Applicants start on Free (or the trial); you approve those who have hosted one real game (the owner Beta page can see it). | Slower start; strangers from groups may drop. Commitment and consistency (Cialdini; foot in the door, Freedman and Fraser, 1966) |
 | 4. **Earned months** | Pro for month 1; months 2 and 3 continue at each check-in if the checklist pace is met (for example 4 games hosted and 2 after-game forms by day 30). Stated in the agreement before they accept. | Changes the public "Pro free for 3 months" promise: /beta must change before new applications, and testers already approved keep their terms |
 | 5. **Check-ins with a waitlist** | Weekly check-in (`/beta` check-in page exists). Two missed in a row: a friendly note. Three: the spot goes to the waitlist, said up front. | You (or the beta lead) must read check-ins weekly |
-| 6. **"Not picked" converts** | Every applicant not chosen gets a kind email: thanks, the Founding Subscriber sale, and (if you choose it) the trial. | None; this is where non-beta sign-ups convert |
+| 6. **"Not picked" converts** | Every applicant not chosen gets a kind email: thanks, the Player One Sale sale, and (if you choose it) the trial. | None; this is where non-beta sign-ups convert |
 
 Recommended: 1, 2, 5 and 6 now (no promise changes); 3 or 4 is your call.
 
@@ -166,7 +166,7 @@ Free.** No card means nothing ever bills on its own, so it is not a negative opt
 | For | Against |
 |---|---|
 | Endowment effect (Kahneman, Knetsch and Thaler, 1990) and loss aversion: teachers feel every game, theme and the live monitor, so Free feels like a step down, not a starting point | **The Monday problem:** a teacher plans a lesson on Bubble Pop, the trial ends, and the game is locked in front of 25 kids. Feels like bait and switch; the trust cost lands on the brand schools must trust |
-| The IKEA effect: themes they design in the trial pull them back | Downgrade rules must be exact: extra sets, classes and themes stay saved and readable ("Nothing is ever deleted" is already promised) |
+| The IKEA effect: themes they design in the trial pull them back | Downgrade rules must be exact: extra sets, classes and themes stay saved and readable (the "Nothing is ever deleted" label was removed by the owner, 2026-11-27; the rule still stands) |
 | Reverse trials are a known growth pattern (Elena Verna, via search results; her conversion figures are her own reports, not studies, so we do not use them) | School calendar: a 14-day trial that starts Dec 18 dies over winter break |
 | Teachers who never pay still finish on a real Free plan, so the pipeline stays | Less reason to subscribe before Jan 1 if the trial outlasts the launch sale |
 

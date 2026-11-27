@@ -1,4 +1,4 @@
-import { useMemo, useState, type DragEvent, type ReactNode } from 'react';
+import { useMemo, useState, type DragEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, Copy, Eye, FileArrowUp, FolderSimple, FolderSimplePlus, Info, MagnifyingGlass, PencilSimple, Play, Plus, RocketLaunch, Trash, Warning } from '@phosphor-icons/react';
 import { TIERS } from '../config';
@@ -11,7 +11,7 @@ import { t } from '../i18n';
 import { Button, buttonClasses, fieldClasses, IconButton, PageHeader, Panel, Tabs } from '../ui/kit';
 import { gradeLabel, matchesFilter, missingDetails, type SetFilter } from '../data/setDetails';
 import { cleanFolder, facetOptions, folderNames, FOLDERS_KEY, hasFolder, inFolder, matchesFacets, type Facets } from '../data/folders';
-import SetCover, { ART } from '../games/SetCover';
+import SetCover from '../games/SetCover';
 import SetFilterBar from '../games/SetFilterBar';
 import TeacherNav from '../ui/TeacherNav';
 import Dialog from '../ui/Dialog';
@@ -188,10 +188,13 @@ function MySets({ sets, reload, limit, atLimit, onHost }: { sets: QuestionSet[];
         {sets.length === 0 && <Panel><p className="font-bold text-text">{t('sets.emptyMine')}</p></Panel>}
         {sets.length > 0 && shown.length === 0 && <Panel><p className="font-bold text-text">{open && !inView.length ? t('sets.emptyFolder') : t('sets.noneMatch')}</p></Panel>}
         {shown.length > 0 && (
-          <section className="@container bg-surface border-bold border-border rounded-panel p-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            <ul className="list-none m-0 p-0">
-              {shown.map((s, i) => (
-                <SetRow key={s.id} set={s} first={i === 0} stats={stats.get(s.id)} confirming={confirming === s.id}
+          // Picture cards in a masonry wall (owner, 2026-11-27: "improve the layout
+          // of the question set section to be more like this", her two card-wall
+          // screenshots): cover on top, title, the details, then the buttons.
+          <section className="@container">
+            <ul className="list-none m-0 p-0 columns-1 @[34rem]:columns-2 @[54rem]:columns-3 gap-4">
+              {shown.map((s) => (
+                <SetRow key={s.id} set={s} stats={stats.get(s.id)} confirming={confirming === s.id}
                   onEdit={() => navigate(`/teacher/sets/${s.id}`)}
                   onMove={() => setDialog({ kind: 'move', set: s })}
                   onUse={() => navigate(`/teacher/activity?set=${encodeURIComponent(s.id)}`)}
@@ -269,80 +272,91 @@ function FolderNameDialog({ title, start, taken, onClose, onSave }: { title: str
   );
 }
 
-function SetRow({ set: s, first, stats, confirming, onEdit, onMove, onUse, onHost, onDelete, onConfirm, onCancel }: {
-  set: QuestionSet; first: boolean; stats?: PlayStats; confirming: boolean;
+function SetRow({ set: s, stats, confirming, onEdit, onMove, onUse, onHost, onDelete, onConfirm, onCancel }: {
+  set: QuestionSet; stats?: PlayStats; confirming: boolean;
   onEdit: () => void; onMove: () => void; onUse: () => void; onHost: () => void; onDelete: () => void; onConfirm: () => void; onCancel: () => void;
 }) {
   const name = s.name || t('sets.untitled');
   const notReady = s.questions.filter((q) => !isPlayable(q)).length;
-  const art = ART[s.subject ?? 'Other'];
-  const chips: ReactNode = (s.standards?.length || s.noStandard) ? (
-    <span className="flex flex-wrap gap-1">
-      {(s.standards ?? []).map((c) => <span key={c} className="min-h-7 px-2.5 rounded-pill bg-lavender text-xs font-bold inline-flex items-center">{c}</span>)}
-      {s.noStandard && <span className="min-h-7 px-2.5 rounded-pill bg-lavender text-xs font-bold inline-flex items-center">{t('sets.noStandardChip')}</span>}
-    </span>
-  ) : null;
   const meta = [s.subject, s.grades && t('filter.gradesShort', { grades: gradeLabel(s.grades) }), t('sets.questions', { count: s.questions.length })].filter(Boolean).join(', ');
+  // The first question's picture shows on the cover when the set has no cover of its own.
+  const pic = s.cover ? undefined : s.questions.find((q) => q.imageUrl)?.imageUrl;
   return (
     <li draggable onDragStart={(e) => { e.dataTransfer.setData('text/gamify-set', s.id); e.dataTransfer.effectAllowed = 'move'; }}
-      className={`grid items-center gap-x-4 gap-y-2 px-3 py-3 grid-cols-[3.5rem_minmax(0,1fr)_auto] @[64rem]:grid-cols-[3.5rem_minmax(0,1fr)_12rem_9rem_auto] ${first ? '' : 'border-t border-border/10'}`}>
-      <span aria-hidden="true" className="row-span-2 @[64rem]:row-span-1 self-start @[64rem]:self-center w-14 h-14 rounded-input grid place-items-center font-display text-2xl uppercase" style={{ background: art.bg, color: art.ink }}>{name.trim()[0]}</span>
-      <div className="min-w-0 grid gap-1">
-        <h2 className="font-heading text-base font-bold leading-snug"><Title text={name} /></h2>
-        <p className="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-muted">
-          {meta}
-          {notReady > 0 && <span className="min-h-7 px-2.5 rounded-pill bg-secondary text-text text-xs font-bold inline-flex items-center gap-1"><Warning weight="bold" size={12} aria-hidden="true" />{t('sets.needsWork', { count: notReady })}</span>}
-          {missingDetails(s).length > 0 && <span className="min-h-7 px-2.5 rounded-pill bg-butter text-text text-xs font-bold inline-flex items-center gap-1"><Warning weight="bold" size={12} aria-hidden="true" />{t('sets.needsDetails')}</span>}
-        </p>
-      </div>
-      {chips && <span className="hidden @[64rem]:flex">{chips}</span>}
-      <span className="w-[9rem] grid gap-1 text-sm font-bold self-start @[64rem]:self-center">
-        {stats ? (
-          <>
-            <span className="text-xs text-muted">{t('sets.firstTry')}</span>
-            <span className="inline-flex items-center gap-2">
-              <span role="img" aria-label={t('sets.firstTryPct', { pct: stats.pct })} className="inline-block h-2.5 w-[4.5rem] rounded-full overflow-hidden bg-[var(--cream)]"><span className="block h-full rounded-full" style={{ width: `${stats.pct}%`, background: skillColor(stats.pct) }} /></span>
+      className="break-inside-avoid mb-4 bg-surface border-bold border-border rounded-panel overflow-hidden grid hover-lift" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+      <button type="button" onClick={onEdit} aria-label={t('sets.editN', { name })} className="block w-full border-b-[2.5px] border-border">
+        {pic ? <img src={pic} alt="" className="block w-full max-h-56 object-cover" /> : <SetCover set={s} className="aspect-[16/8]" />}
+      </button>
+      <div className="p-4 grid gap-2">
+        <h2 className="font-heading text-lg font-bold leading-snug text-center"><Title text={name} /></h2>
+        <p className="text-sm font-semibold text-muted text-center">{meta}</p>
+        {(notReady > 0 || missingDetails(s).length > 0) && (
+          <p className="flex flex-wrap justify-center gap-1.5">
+            {notReady > 0 && <span className="min-h-7 px-2.5 rounded-pill bg-secondary text-text text-xs font-bold inline-flex items-center gap-1"><Warning weight="bold" size={12} aria-hidden="true" />{t('sets.needsWork', { count: notReady })}</span>}
+            {missingDetails(s).length > 0 && <span className="min-h-7 px-2.5 rounded-pill bg-butter text-text text-xs font-bold inline-flex items-center gap-1"><Warning weight="bold" size={12} aria-hidden="true" />{t('sets.needsDetails')}</span>}
+          </p>
+        )}
+        {(s.standards?.length || s.noStandard) ? (
+          <p className="flex flex-wrap justify-center gap-1">
+            {(s.standards ?? []).map((c) => <span key={c} className="min-h-7 px-2.5 rounded-pill bg-lavender text-xs font-bold inline-flex items-center">{c}</span>)}
+            {s.noStandard && <span className="min-h-7 px-2.5 rounded-pill bg-lavender text-xs font-bold inline-flex items-center">{t('sets.noStandardChip')}</span>}
+          </p>
+        ) : null}
+        <div className="flex items-center gap-2 text-sm font-bold border-t-2 border-dashed border-border/25 pt-2">
+          {stats ? (
+            <>
+              <span className="text-xs text-muted">{t('sets.firstTry')}</span>
+              <span role="img" aria-label={t('sets.firstTryPct', { pct: stats.pct })} className="inline-block h-2.5 flex-1 max-w-24 rounded-full overflow-hidden bg-[var(--cream)]"><span className="block h-full rounded-full" style={{ width: `${stats.pct}%`, background: skillColor(stats.pct) }} /></span>
               <span aria-hidden="true">{stats.pct}%</span>
-            </span>
-          </>
-        ) : <span className="text-xs text-muted">{t('sets.notPlayed')}</span>}
-      </span>
-      {confirming ? (
-        <div className="col-span-2 @[64rem]:col-span-1 flex flex-wrap items-center gap-2">
-          <span className="font-bold text-sm">{t('sets.deleteConfirm', { name })}</span>
-          <Button variant="danger" size="sm" onClick={onConfirm}>{t('sets.deleteYes')}</Button>
-          <Button variant="ghost" size="sm" onClick={onCancel}>{t('sets.cancel')}</Button>
+            </>
+          ) : <span className="text-xs text-muted">{t('sets.notPlayed')}</span>}
         </div>
-      ) : (
-        <div className="col-span-2 @[64rem]:col-span-1 flex flex-wrap items-center gap-1.5">
-          {chips && <span className="@[64rem]:hidden mr-auto">{chips}</span>}
-          <Button size="sm" onClick={onEdit} aria-label={t('sets.editN', { name })}><PencilSimple weight="bold" size={14} />{t('sets.edit')}</Button>
-          <Button size="sm" onClick={onMove} aria-label={t('sets.moveN', { name })}><FolderSimple weight="bold" size={14} />{t('sets.move')}</Button>
-          <Button size="sm" variant="main" onClick={onUse} aria-label={t('sets.useN', { name })}>{t('sets.use')}<ArrowRight weight="bold" size={14} /></Button>
-          <IconButton label={t('sets.playN', { name })} onClick={onHost}><Play weight="fill" size={16} /></IconButton>
-          <IconButton variant="ghost" label={`${t('sets.delete')}: ${name}`} onClick={onDelete}><Trash weight="bold" size={16} /></IconButton>
-        </div>
-      )}
+        {confirming ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-bold text-sm w-full">{t('sets.deleteConfirm', { name })}</span>
+            <Button variant="danger" size="sm" onClick={onConfirm}>{t('sets.deleteYes')}</Button>
+            <Button variant="ghost" size="sm" onClick={onCancel}>{t('sets.cancel')}</Button>
+          </div>
+        ) : (
+          <div className="grid gap-1.5">
+            <Button variant="main" onClick={onUse} aria-label={t('sets.useN', { name })} className="w-full justify-center">{t('sets.use')}<ArrowRight weight="bold" size={16} /></Button>
+            <div className="flex items-center gap-1.5">
+              <Button size="sm" onClick={onEdit} aria-label={t('sets.editN', { name })} className="flex-1 justify-center"><PencilSimple weight="bold" size={14} />{t('sets.edit')}</Button>
+              <IconButton label={t('sets.playN', { name })} onClick={onHost}><Play weight="fill" size={16} /></IconButton>
+              <IconButton label={t('sets.moveN', { name })} onClick={onMove}><FolderSimple weight="bold" size={16} /></IconButton>
+              <IconButton variant="ghost" label={`${t('sets.delete')}: ${name}`} onClick={onDelete}><Trash weight="bold" size={16} /></IconButton>
+            </div>
+          </div>
+        )}
+      </div>
     </li>
   );
 }
 
+// Ready-made sets as a card wall with a search box at the left (owner's
+// screenshots, 2026-11-27): one header'd search panel, picture cards beside it.
 function Library({ atLimit, onCopied, onHost }: { atLimit: boolean; onCopied: (id: string) => void; onHost: (s: QuestionSet) => void }) {
   const [filter, setFilter] = useState<SetFilter>({});
   const shown = LIBRARY.filter((s) => matchesFilter(s, filter));
 
   return (
-    <div className="grid gap-3">
-      <p className="font-bold text-text">{t('sets.copyNote')}</p>
-      <SetFilterBar value={filter} onChange={setFilter} sets={LIBRARY} />
+    <div className="grid gap-4 min-[900px]:grid-cols-[16rem_minmax(0,1fr)] items-start">
+      <section aria-labelledby="lib-search" className="bg-surface border-bold border-border rounded-panel overflow-hidden min-[900px]:sticky min-[900px]:top-4" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <h2 id="lib-search" className="bg-grape text-white font-heading font-bold text-lg text-center px-4 py-3 border-b-[2.5px] border-border">{t('sets.searchLibrary')}</h2>
+        <div className="p-3 grid gap-3">
+          <SetFilterBar value={filter} onChange={setFilter} sets={LIBRARY} stacked />
+          <p className="text-sm font-semibold text-muted">{t('sets.copyNote')}</p>
+        </div>
+      </section>
+      <div className="min-w-0 @container">
       {shown.length === 0 && <Panel><p className="font-bold">{t('filter.none')}</p></Panel>}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="columns-1 @[34rem]:columns-2 @[54rem]:columns-3 gap-4">
         {shown.map((s) => (
-          <div key={s.id} className="bg-surface border-bold border-border rounded-panel overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            <SetCover set={s} className="aspect-[16/7] border-b-[2.5px] border-border" />
+          <div key={s.id} className="break-inside-avoid mb-4 bg-surface border-bold border-border rounded-panel overflow-hidden flex flex-col hover-lift" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <Link to={`/teacher/library/${s.id}`} aria-label={`${t('sets.preview')}: ${s.name}`} className="block border-b-[2.5px] border-border">{(() => { const pic = s.cover ? undefined : s.questions.find((q) => q.imageUrl)?.imageUrl; return pic ? <img src={pic} alt="" className="block w-full max-h-56 object-cover" /> : <SetCover set={s} className={['aspect-[16/9]', 'aspect-[4/3]', 'aspect-[16/7]'][s.questions.length % 3]} />; })()}</Link>
             <div className="p-4 flex flex-col gap-2 flex-1">
               <p className="text-xs font-bold uppercase tracking-wider text-muted">{s.subject} · {t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</p>
-              <h2 className="font-display text-xl font-bold"><Title text={s.name} /></h2>
+              <h3 className="font-heading text-lg font-bold leading-snug"><Title text={s.name} /></h3>
               <p className="text-muted text-sm font-bold">{t('sets.questions', { count: s.questions.length })}</p>
               <p className="flex flex-wrap gap-1">
                 {(s.standards ?? []).map((c) => <span key={c} className="text-xs font-bold px-2 py-0.5 rounded-pill border border-border bg-surface-2">{c}</span>)}
@@ -361,6 +375,7 @@ function Library({ atLimit, onCopied, onHost }: { atLimit: boolean; onCopied: (i
             </div>
           </div>
         ))}
+      </div>
       </div>
     </div>
   );
