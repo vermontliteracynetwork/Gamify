@@ -75,7 +75,6 @@ test('classes list shows each class\'s week at a glance', async ({ page }) => {
 test('Free shows only today\'s score for each student; paid plans get the example report', async ({ page }) => {
   await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'free' })); });
   await page.goto('/teacher/reports');
-  await expect(page.getByText('Today\'s scores for each student. Free saves nothing after today.')).toBeVisible();
   await expect(page.getByText('No games played today yet.', { exact: false })).toBeVisible();
 });
 

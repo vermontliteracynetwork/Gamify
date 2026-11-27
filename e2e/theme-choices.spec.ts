@@ -92,8 +92,8 @@ test('share a class theme in the gallery: owner approves, and it shows on the Th
 
   // The ongoing public vote: the Feb tab lists the entry; pick it and vote once a day.
   await page.clock.setFixedTime(new Date('2027-01-10T15:00:00Z'));
-  await page.goto('/challenge');
-  await page.getByRole('tab', { name: 'Feb' }).click();
+  // Each special day has its own page (owner, 2026-11-27).
+  await page.goto('/challenge/pizza-day');
   const entry = page.getByRole('tabpanel').getByRole('listitem').filter({ has: page.getByRole('heading', { name: 'Rainbow Room' }) });
   await entry.getByRole('button', { name: 'Pick' }).click();
   await page.getByRole('button', { name: 'Vote', exact: true }).click();
@@ -109,8 +109,7 @@ test('share a class theme in the gallery: owner approves, and it shows on the Th
   await page.getByRole('button', { name: 'Pick as winner' }).click();
   await expect(page.getByRole('button', { name: 'Winner (tap to undo)' })).toBeVisible();
   await page.clock.setFixedTime(new Date('2027-02-09T05:30:00Z'));
-  await page.goto('/challenge');
-  await page.getByRole('tab', { name: 'Feb' }).click();
+  await page.goto('/challenge/pizza-day');
   await expect(page.getByRole('heading', { name: 'Winner: Rainbow Room' })).toBeVisible();
   await expect(page.getByText('Voting closed on February 7, 2027.', { exact: false })).toBeVisible();
 });

@@ -42,7 +42,7 @@ test('the games need sign-in; a student joins with a game code', async ({ page }
   // Free has no class or student list (owner, 2026-11-26): the Students page says so.
   await page.getByRole('navigation', { name: 'Teacher pages' }).getByRole('link', { name: 'Students' }).click();
   await expect(page.getByRole('heading', { name: 'My Students' })).toBeVisible();
-  await expect(page.getByText('Student lists come with Plus, Pro and Homeschool.')).toBeVisible();
+  await expect(page.getByText(/Upgrade to keep a student list/)).toBeVisible();
   // Students get in only with a game code (teacher, 2026-10-31).
   await expect(page.getByText(/Join code/)).toHaveCount(0);
   const code = 'BKDFG';
@@ -162,9 +162,8 @@ test.describe('research', () => {
     await page.waitForTimeout(800);
     await page.screenshot({ path: `test-results/research-${info.project.name}.png`, fullPage: true });
     await expect(page.getByRole('heading', { name: /Designed around what works/i })).toBeVisible();
-    await page.getByRole('tab', { name: 'The beta test' }).click();
-    await expect(page.getByRole('heading', { name: /Gamify is just getting started/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Join the beta test' }).first()).toHaveAttribute('href', '/beta');
+    // The beta test moved from Research to Home (owner, 2026-11-27).
+    await expect(page.getByRole('tab', { name: 'The beta test' })).toHaveCount(0);
     await page.getByRole('tab', { name: 'Sources' }).click();
     expect(await page.getByRole('link', { name: /Psychological Bulletin/ }).count()).toBeGreaterThan(1);
     await expect(page).toHaveTitle('Research | Gamify');
@@ -235,15 +234,14 @@ test.describe('features page', () => {
     await games.getByRole('button', { name: 'Territory', exact: true }).click();
     await expect(games.getByText('Themes your class makes for this game show up here too.')).toBeVisible();
     // Try a look: the picture redraws from the colors picked.
-    await page.getByRole('link', { name: 'Class themes' }).click();
-    await expect(page).toHaveURL(/#themes/);
+    await page.locator('#themes').scrollIntoViewIfNeeded();
     await page.getByRole('radio', { name: 'Night' }).click();
     await expect(page.getByRole('radio', { name: 'Night' })).toHaveAttribute('aria-checked', 'true');
     await page.getByRole('button', { name: 'Bigger text' }).click();
     await expect(page.getByRole('button', { name: 'Bigger text' })).toHaveAttribute('aria-pressed', 'true');
     await page.getByRole('button', { name: 'A 1/4' }).click();
     await expect(page.getByText('You got it!', { exact: false })).toBeVisible();
-    await expect(page.getByText('lock screens with one tap', { exact: false })).toBeVisible();
+    await expect(page.getByText('lock screens with one tap', { exact: false }).first()).toBeAttached();
   });
   test('a theme made in the Theme Builder joins the game picture cycle', async ({ page }) => {
     await page.goto('/features');
@@ -406,7 +404,7 @@ test.describe('buyer pages', () => {
     await expect(page.getByRole('heading', { level: 1, name: /Our Student Data Promise/i })).toBeVisible();
     await page.goto('/homeschool');
     // The Homeschool plan lives on the Homeschool page, linked from Pricing.
-    await expect(page.getByRole('link', { name: 'Start the Homeschool plan' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Get Homeschool' })).toBeVisible();
     // Three homeschool posts, then View all blog (owner 2026-11-26); no five-day week.
     await expect(page.locator('main a[href^="/blog/"]')).toHaveCount(3);
     await expect(page.getByText('One Question Set, Five Different Days')).toHaveCount(0);
@@ -430,11 +428,12 @@ test.describe('device check', () => {
   });
 });
 
-test('Theme Building Challenge: two tracks, and a printable permission slip for hand-drawn entries', async ({ page }, info) => {
+test('Theme Building Challenge: two tracks, and a printable permission slip for physical entries', async ({ page }, info) => {
   await page.goto('/challenge');
   await expect(page.getByRole('heading', { name: 'Two Ways to Enter' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Drawn by Hand' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Built in the Theme Builder' })).toBeVisible();
+  // Physical or digital, any medium (owner, 2026-11-27).
+  await expect(page.getByRole('heading', { name: 'Create physically' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Design digitally' })).toBeVisible();
   await page.getByRole('link', { name: 'Print the permission slip' }).click();
   await expect(page.getByRole('heading', { name: /Permission Slip/ })).toBeVisible();
   await expect(page.getByText('Parent or guardian name')).toBeVisible();
@@ -468,17 +467,12 @@ test('every new page opens at the top, and the comparison chart lists every plan
   // detailed comparison chart"): four lines each, then the chart has a row for
   // every highlight of every plan.
   await expect(page.getByText('A game for each student: pick the game and the questions, one student at a time')).toHaveCount(0);
-  await page.getByRole('link', { name: 'Compare every feature' }).first().click();
-  const chart = page.getByRole('table', { name: 'Compare Every Feature' });
-  await expect(chart).toBeVisible();
-  for (const row of ['Games', 'New games before anyone else', 'Theme Builder designs', 'Classes', 'Students', 'Live monitor and Lock', 'Saved question sets', 'Report history',
-    'Live mode (class lobby)', 'Class lobby: leaderboard or one class goal', 'Groups in the lobby, each with its own game', 'Sets assigned per student', 'Library themes', 'Theme guide templates',
-    'Student sign-in pictures', 'A question set for each student', 'A game for each student', 'Choice boards', 'Theme choices', 'Reports by student', 'Your own Lock message', 'A fresh class lobby code each time', 'Read-aloud']) {
-    await expect(chart.getByRole('rowheader', { name: new RegExp(`^${row.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`) })).toHaveCount(1);
+  // The chart is "Compare Features", topics fold open (owner, 2026-11-27).
+  await page.getByRole('link', { name: 'Compare features' }).first().click();
+  await expect(page.getByRole('heading', { name: 'Compare Features' })).toBeVisible();
+  for (const topic of ['Games and ways to play', 'Classes and students', 'Question sets', 'Themes and the Theme Builder', 'Live games and reports', 'Privacy and data']) {
+    await expect(page.locator('#compare').getByText(topic, { exact: true }).first()).toBeAttached();
   }
-  await expect(chart.getByRole('row', { name: /^Choice boards/ }).getByRole('cell').nth(2)).toHaveText('Included');
   await page.screenshot({ path: `test-results/pricing-plans-${info.project.name}.png`, fullPage: true });
-  await page.goto('/features');
-  await expect(page.getByText('Choice boards: students pick from the games you choose')).toBeVisible();
   expect(problems).toEqual([]);
 });

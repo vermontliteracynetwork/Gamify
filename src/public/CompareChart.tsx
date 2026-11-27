@@ -97,7 +97,7 @@ function Tip({ text }: { text: string }) {
 function Fold({ g, open, onToggle, id }: { g: Group; open: boolean; onToggle: () => void; id: string }) {
   return (
     <button type="button" aria-expanded={open} aria-controls={id} onClick={onToggle} className="w-full flex items-center gap-3 text-left min-h-12 cursor-pointer">
-      <span className="font-display text-xl leading-tight flex-1">{g.title}{g.note && <span className="ml-3 font-body text-base font-bold text-muted normal-case">{g.note}</span>}</span>
+      <span className="font-display text-xl leading-tight flex-1">{g.title}{g.note && <span className="sr-only">. </span>}{g.note && <span className="ml-3 font-body text-base font-bold text-muted normal-case">{g.note}</span>}</span>
       <CaretDown weight="bold" size={22} className={`shrink-0 motion-safe:transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
     </button>
   );

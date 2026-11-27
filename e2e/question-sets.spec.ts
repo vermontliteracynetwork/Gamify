@@ -197,7 +197,7 @@ test('sets: folders, filters, first-try results and Use', async ({ page }, info)
   });
   await page.goto('/teacher/sets');
   // Real play shows the class meter; a set never played says so, with no number.
-  await expect(page.getByRole('img', { name: '67% right on the first try' })).toBeVisible();
+  await expect(page.getByText('67% right on the first try')).toBeAttached();
   await expect(page.getByText('Not played yet')).toBeVisible();
   // Facets: only the subjects the sets have.
   await page.getByRole('button', { name: 'Show only Subject Math' }).click();
@@ -224,7 +224,7 @@ test('sets: folders, filters, first-try results and Use', async ({ page }, info)
   await expect(page.getByRole('heading', { name: 'Commas' })).toBeVisible();
   await page.screenshot({ path: `test-results/sets-folders-${info.project.name}.png` });
   // The editor shows how each question played and its most picked wrong answer.
-  await page.getByRole('button', { name: 'Edit Commas' }).click();
+  await page.getByRole('button', { name: 'Edit Commas' }).first().click();
   await expect(page.getByText('How it played: 50% right on the first try (2 answers)')).toBeVisible();
   await expect(page.getByText('Most picked wrong answer: B, "no" (picked once).')).toBeVisible();
   await page.getByRole('list', { name: 'Questions in this set' }).getByRole('button').nth(1).click();

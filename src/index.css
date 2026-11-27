@@ -207,6 +207,8 @@ body {
    heading font, Inclusive Sans bold (teacher, 2026-10-31: "dont use loyola"). */
 h1, .title-bubble {
   font-family: var(--font-display);
+  /* Even lines, never one word left alone ("LOG / IN"), from the visual review 2026-11-27. */
+  text-wrap: balance;
 }
 h2, h3, .font-display {
   font-family: var(--font-heading);

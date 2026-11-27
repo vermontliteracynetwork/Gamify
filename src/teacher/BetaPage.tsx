@@ -1,5 +1,7 @@
 import { t } from '../i18n';
-import { PageHeader, Panel } from '../ui/kit';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from '@phosphor-icons/react';
+import { buttonClasses, PageHeader, Panel } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
 import { useBetaSteps, useBetaTester } from '../beta/tester';
 import { BetaTab } from './BetaChecklist';
@@ -13,7 +15,7 @@ export default function BetaPage() {
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
       <PageHeader title={t('teacherNav.beta')} />
-      {beta ? <BetaTab s={beta} /> : on ? null : <Panel><p className="font-bold">{t('bcheck.onlyTesters')}</p></Panel>}
+      {beta ? <BetaTab s={beta} /> : on ? null : <Panel className="grid gap-3 justify-items-start"><p className="font-bold m-0">{t('bcheck.onlyTesters')}</p><Link to="/beta/apply" className={buttonClasses('primary')}>{t('bcheck.apply')}<ArrowRight weight="bold" size={18} aria-hidden="true" /></Link></Panel>}
     </main>
   );
 }
