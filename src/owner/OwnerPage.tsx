@@ -439,35 +439,57 @@ function ThemeReview({ th, onClose, onDecide, why, setWhy }: { th: GameTheme; on
 }
 
 // Everything only the owner can do, first on the desktop every time it opens.
+// Waiting on you as a scannable card board (owner, 2026-11-27: "visual and
+// simple views for all pages in my developer portal"): a filter by kind,
+// urgent items first, each card a colored kind chip, the title, the Go
+// buttons and a Done tick; the why and how sit under a caret.
+const KIND_COLOR: Record<string, string> = { setup: '#bfdff3', money: '#c8f0dc', legal: '#ffd3e6', people: '#fff1b8', decide: '#ddd6ff' };
 function WaitingCard() {
   const [done, setDone] = useState<string[]>([]);
+  const [kind, setKind] = useState<string>('');
   useEffect(() => { void data.getSetting<string[]>('owner-waiting-done').then((v) => setDone(v ?? [])); }, []);
   function toggle(id: string) {
     const next = done.includes(id) ? done.filter((x) => x !== id) : [...done, id];
     setDone(next);
     void data.setSetting('owner-waiting-done', next);
   }
-  const open = WAITING.filter((w) => !done.includes(w.id));
+  const inKind = WAITING.filter((w) => !kind || w.kind === kind);
+  const open = inKind.filter((w) => !done.includes(w.id)).sort((x, y) => Number(!!y.urgent) - Number(!!x.urgent));
+  const closed = inKind.filter((w) => done.includes(w.id));
+  const kinds = [...new Set(WAITING.map((w) => w.kind))];
+  const card = (w: (typeof WAITING)[number]) => {
+    const ticked = done.includes(w.id);
+    return (
+      <li key={w.id} className={`rounded-[1rem] border p-4 grid gap-2.5 content-start ${ticked ? 'opacity-55 bg-[#fafafa]' : 'bg-white'} ${w.urgent && !ticked ? 'border-[#f055a5] border-2' : 'border-[#e4e4e7]'}`}>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full px-2.5 py-0.5 text-xs font-bold" style={{ background: KIND_COLOR[w.kind] }}>{t(`owner.waitingKind.${w.kind}` as StringKey)}</span>
+          {w.urgent && !ticked && <span className="rounded-full px-2.5 py-0.5 text-xs font-bold text-white" style={{ background: '#f055a5' }}>Urgent</span>}
+          <span className="flex-1" />
+          <button type="button" role="checkbox" aria-checked={ticked} onClick={() => toggle(w.id)} aria-label={t('owner.waitingDone', { title: w.title })} className={`w-9 h-9 rounded-full border-2 grid place-items-center ${ticked ? 'bg-[#22b04a] border-[#22b04a] text-white' : 'border-[#d4d4d8]'}`}><CheckSquare weight="bold" size={18} /></button>
+        </div>
+        <p className={`font-bold text-base leading-snug m-0 ${ticked ? 'line-through' : ''}`}>{w.title}</p>
+        {!ticked && <DoLinks w={w} small />}
+        <details><summary className="cursor-pointer text-sm font-bold text-[#52525b]">What and why</summary>
+          <p className="text-sm m-0 mt-1.5">{w.how}</p>
+          <p className="text-sm text-[#71717a] m-0 mt-1.5">{w.why}</p>
+          <p className="text-xs font-bold text-[#71717a] m-0 mt-1.5">{t('owner.waitingAdded', { date: w.added })}</p>
+        </details>
+      </li>
+    );
+  };
   return (
-    <div className="grid gap-2">
-      <p className="font-bold">{open.length ? t('owner.waitingCount', { count: open.length }) : t('owner.waitingNone')}</p>
-      <ul className="grid gap-2 list-none p-0 m-0">
-        {[...open, ...WAITING.filter((w) => done.includes(w.id))].map((w) => {
-          const ticked = done.includes(w.id);
-          return (
-            <li key={w.id} className={`rounded-input border-std p-3 grid grid-cols-[auto_1fr] gap-3 ${ticked ? 'border-border-soft opacity-60' : 'border-border bg-surface'}`}>
-              <input type="checkbox" checked={ticked} onChange={() => toggle(w.id)} aria-label={t('owner.waitingDone', { title: w.title })} className="w-6 h-6 mt-1" />
-              <div className="grid gap-1">
-                <p className={`font-display text-lg leading-tight ${ticked ? 'line-through' : ''}`}>{w.title}</p>
-                <p className="text-sm font-semibold">{w.why}</p>
-                <p className="text-sm font-semibold text-muted"><span className="font-bold">{t('owner.waitingHow')} </span>{w.how}</p>
-                {!ticked && <DoLinks w={w} small />}
-                <p className="text-xs font-bold text-muted">{t(`owner.waitingKind.${w.kind}` as StringKey)} · {t('owner.waitingAdded', { date: w.added })}</p>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+    <div className="grid gap-5">
+      <div className="flex flex-wrap items-center gap-2">
+        <b className="text-2xl mr-2">{open.length}<span className="text-base font-semibold text-[#52525b]"> open</span></b>
+        <button type="button" aria-pressed={!kind} onClick={() => setKind('')} className={`min-h-9 px-3 rounded-full border text-sm font-bold ${!kind ? 'bg-[#ede9fe] border-[#6a45f0] text-[#6a45f0]' : 'border-[#e4e4e7]'}`}>All</button>
+        {kinds.map((k) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => setKind(k)} className={`min-h-9 px-3 rounded-full border text-sm font-bold ${kind === k ? 'border-[#1d1a33]' : 'border-[#e4e4e7]'}`} style={{ background: kind === k ? KIND_COLOR[k] : undefined }}>{t(`owner.waitingKind.${k}` as StringKey)}</button>)}
+      </div>
+      <ul className="grid md:grid-cols-2 xl:grid-cols-3 gap-3 list-none p-0 m-0 items-start">{open.map(card)}</ul>
+      {closed.length > 0 && (
+        <details><summary className="cursor-pointer font-bold">Done ({closed.length})</summary>
+          <ul className="grid md:grid-cols-2 xl:grid-cols-3 gap-3 list-none p-0 mt-3 mb-0 items-start">{closed.map(card)}</ul>
+        </details>
+      )}
     </div>
   );
 }

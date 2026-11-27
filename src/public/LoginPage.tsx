@@ -135,7 +135,7 @@ export default function LoginPage() {
         </form>
         {/* Students: the quiet line from the mockup, with the way to Join. */}
         {/* Students: one magenta button the size of Log in (owner, 2026-11-27). */}
-        <Link to="/join" className={buttonClasses('main', 'min-h-14 text-lg hover-pop justify-center !bg-[#e0218a] !text-white no-underline')}>{t('login.joinGame')}</Link>
+        <Link to="/join" className={buttonClasses('main', 'min-h-14 hover-pop justify-center !bg-[#e0218a] !text-white no-underline font-score !text-2xl')}>{t('login.joinGame')}</Link>
       </div>
     </main>
     </ScrapbookPage>
