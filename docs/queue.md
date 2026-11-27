@@ -539,4 +539,9 @@ want in the carosel and promotional otherwise."
     button, results say New game (no Arcade), uploads are photos of any
     medium, and canceling turns extra items read-only (no "nothing is
     deleted").
+117. [x] **Student training** (owner checklist): the Beta Classroom Kit
+    (/beta-kit) now starts with "Your First Gamify Game", a 10-minute lesson
+    (code, name, a practice question and power-ups, the gear supports, the
+    flag), and a "How to Play" picture poster for pre-readers. Fixed: the kit
+    said to tap a speech bubble, but Tell Gamify is the flag button.
 

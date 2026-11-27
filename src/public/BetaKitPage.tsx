@@ -1,4 +1,4 @@
-import { Bug, ChatCircleDots, Lightbulb, Printer, SmileySad, Warning } from '@phosphor-icons/react';
+import { Bug, CheckCircle, Flag, GearSix, Keyboard, Lightbulb, Printer, SmileySad, UserCircle, Warning } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { Link } from 'react-router-dom';
@@ -15,6 +15,13 @@ const CHOICES = [
   { icon: Lightbulb, key: 'tell.idea', color: 'var(--color-butter)' },
 ] as const;
 
+const DAY = [
+  { icon: Keyboard, color: 'var(--color-butter)' },
+  { icon: UserCircle, color: '#ddd6ff' },
+  { icon: CheckCircle, color: '#c8f2c9' },
+  { icon: GearSix, color: '#ffd9b3' },
+] as const;
+
 export default function BetaKitPage() {
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-10 grid gap-5">
@@ -23,6 +30,28 @@ export default function BetaKitPage() {
         <p className="font-bold">{t('kit.sub')}</p>
         <button type="button" onClick={() => window.print()} className={buttonClasses('main', 'justify-self-start hover-pop')}><Printer weight="bold" size={18} />{t('kit.print')}</button>
       </div>
+
+      {/* Student training (owner checklist, 2026-11-27): the first day, then a picture poster for pre-readers. */}
+      <section className="template-page bg-white border-bold border-border rounded-panel p-10 grid gap-4 content-start" aria-label={t('kit.dayTitle')}>
+        <h2 className="title-bubble text-4xl"><Title text={t('kit.dayTitle')} /></h2>
+        <p className="font-bold text-lg">{t('kit.dayGoal')}</p>
+        <ol className="grid gap-3 pl-7 m-0 list-decimal text-lg font-semibold">
+          {[1, 2, 3, 4, 5].map((n) => <li key={n}>{t(`kit.day.${n}` as StringKey)}</li>)}
+        </ol>
+      </section>
+
+      <section className="template-page bg-white border-bold border-border rounded-panel p-10 grid gap-6 content-evenly justify-items-center text-center min-h-[10in]" aria-label={t('kit.dayPoster')}>
+        <h2 className="font-display text-6xl"><Title text={t('kit.dayPoster')} /></h2>
+        <ol className="grid grid-cols-2 gap-5 w-full list-none m-0 p-0">
+          {DAY.map(({ icon: Icon, color }, i) => (
+            <li key={i} className="rounded-panel border-heavy border-border p-6 grid justify-items-center gap-3" style={{ background: color }}>
+              <span className="w-12 h-12 rounded-full bg-white border-std border-border grid place-items-center font-display text-2xl">{i + 1}</span>
+              <Icon weight="bold" size={96} aria-hidden="true" />
+              <span className="font-display text-3xl leading-tight">{t(`kit.dayPoster.${i + 1}` as StringKey)}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
 
       <section className="template-page bg-white border-bold border-border rounded-panel p-10 grid gap-4 content-start" aria-label={t('kit.lessonTitle')}>
         <h2 className="title-bubble text-4xl"><Title text={t('kit.lessonTitle')} /></h2>
@@ -44,7 +73,7 @@ export default function BetaKitPage() {
 
       <section className="template-page bg-white border-bold border-border rounded-panel p-10 grid gap-6 content-evenly justify-items-center text-center min-h-[10in]" aria-label={t('kit.posterTitle')}>
         <h2 className="font-display text-6xl"><Title text={t('kit.posterTitle')} /></h2>
-        <span className="w-44 h-44 rounded-full border-[4px] border-border bg-mint-soft flex items-center justify-center"><ChatCircleDots weight="bold" size={110} aria-hidden="true" /></span>
+        <span className="w-44 h-44 rounded-full border-[4px] border-border bg-mint-soft flex items-center justify-center"><Flag weight="bold" size={110} aria-hidden="true" /></span>
         <p className="font-display text-3xl">{t('kit.posterTap')}</p>
         <div className="grid grid-cols-3 gap-4 w-full">
           {CHOICES.map(({ icon: Icon, key, color }) => (
