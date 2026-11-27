@@ -59,7 +59,7 @@ test('Pricing: Start with Pro opens the plan box after sign-up, and a school get
   // Without the email service (as here) the request is kept and the quote follows by email.
   await expect(page.getByText(/rivera@school\.org/)).toBeVisible();
   await expect(page.getByRole('status').filter({ hasText: /quote/i })).toBeVisible();
-  await page.getByRole('link', { name: 'Start with Pro' }).click();
+  await page.getByRole('link', { name: 'Go Pro' }).click();
   await expect(page).toHaveURL(/plan=pro/);
   await signUpTeacher(page);
   await expect(page.getByRole('dialog').getByRole('button', { name: 'Get Pro now' })).toBeVisible();

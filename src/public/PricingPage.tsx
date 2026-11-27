@@ -68,10 +68,10 @@ export default function PricingPage() {
                 <div className="grid gap-1 pt-4 border-t-2 border-dashed border-border">
                   {x === 'free'
                     ? <><p className="font-score text-5xl leading-none tabular-nums m-0">{t('pricing.free.price')}</p><p className="font-semibold m-0">{t('pricing.free.note')}</p></>
-                    : <StackedPrice plan={x as 'plus' | 'pro'} billing={billing} big={x === 'plus'} />}
+                    : <StackedPrice plan={x as 'plus' | 'pro'} billing={billing} />}
                 </div>
-                <Link to={x === 'free' ? '/login?mode=signup' : `/login?mode=signup&plan=${x}`} className={buttonClasses('go', 'min-h-14 text-lg hover-pop')}>
-                  {x === 'free' ? t('public.startFree') : t('pricing.startWith', { plan: t(`pricing.${x}`) })}
+                <Link to={x === 'free' ? '/login?mode=signup' : `/login?mode=signup&plan=${x}`} className={buttonClasses('go', 'min-h-14 hover-pop font-score !text-2xl')}>
+                  {t(`pricing.cta.${x}` as StringKey)}
                 </Link>
               </motion.section>
             );
@@ -200,7 +200,7 @@ function PrincipalNote() {
 // stays under it: a price must say what it renews at (ROSCA and state
 // automatic-renewal rules, the marketing bible).
 const BRIGHT = '#e0218a';
-function StackedPrice({ plan, billing, big }: { plan: 'plus' | 'pro'; billing: Billing; big: boolean }) {
+function StackedPrice({ plan, billing }: { plan: 'plus' | 'pro'; billing: Billing }) {
   const months = billingMonths(billing);
   const standard = PRICES_USD[plan].month;
   const term = PRICES_USD[plan][billing];
@@ -210,13 +210,14 @@ function StackedPrice({ plan, billing, big }: { plan: 'plus' | 'pro'; billing: B
   const final = perMonthTerm * (sale ? 1 - LAUNCH_OFFER.discount : 1);
   const lengthSave = billingSavings(plan, billing);
   const totalSave = Math.round((1 - final / standard) * 100);
-  const m2 = (n: number) => n.toFixed(2).replace(/\.00$/, '');
+  const m2 = (n: number) => (Math.round(n * 100) / 100).toFixed(2).replace(/\.00$/, '');
   return (
     <div className="grid gap-1.5">
-      {(lengthSave > 0 || sale) && <p className="m-0 text-lg font-bold text-muted line-through decoration-2 tabular-nums">{t('pricing.stack.was', { m: m2(standard) })}</p>}
-      {lengthSave > 0 && <p className="m-0 font-bold tabular-nums" style={{ color: BRIGHT }}>{t('pricing.stack.length', { pct: lengthSave, label: t(`pricing.stack.${billing}` as StringKey) })}</p>}
-      {sale && <p className="m-0 font-bold tabular-nums" style={{ color: BRIGHT }}>{t('pricing.stack.sale', { pct: off, name: LAUNCH_OFFER.name })}</p>}
-      <p className="m-0 flex flex-wrap items-baseline gap-x-2"><span className={`title-bubble leading-none tabular-nums ${big ? 'text-6xl' : 'text-5xl'}`}>${m2(final)}</span><span className="text-lg font-bold">{t('upgrade.perMonth')}</span></p>
+      {/* The standard price in the same Grow Year size as Free's $0, struck when a saving applies. */}
+      <p className="m-0 flex flex-wrap items-baseline gap-x-2"><span className={`font-score text-5xl leading-none tabular-nums ${lengthSave > 0 || sale ? 'line-through decoration-[3px] text-muted' : ''}`}>${m2(standard)}</span><span className="text-lg font-bold">{t('upgrade.perMonth')}</span></p>
+      {lengthSave > 0 && <p className="m-0 font-bold tabular-nums" style={{ color: BRIGHT }}>−${m2(standard - perMonthTerm)} ({t(`pricing.stack.${billing}Name` as StringKey)} {lengthSave}% off)</p>}
+      {sale && <p className="m-0 font-bold tabular-nums" style={{ color: BRIGHT }}>−${m2(perMonthTerm - final)} ({LAUNCH_OFFER.name} {off}% off)</p>}
+      {(lengthSave > 0 || sale) && <p className="m-0 flex flex-wrap items-baseline gap-x-2"><span className="font-score text-5xl leading-none tabular-nums">${m2(final)}</span><span className="text-lg font-bold">{t('upgrade.perMonth')}</span></p>}
       {totalSave > 0 && <span className="justify-self-start rounded-pill px-3 min-h-8 inline-flex items-center text-sm font-bold text-white border-std border-border" style={{ background: BRIGHT }}>{t('pricing.stack.total', { pct: totalSave })}</span>}
       <p className="m-0 text-xs font-semibold text-muted">{sale ? t('pricing.stack.fine', { first: m2(term * (1 - LAUNCH_OFFER.discount)), n: m2(term), per: t(`cmp.per.${billing}` as StringKey) }) : t('pricing.stack.fineNoSale', { n: m2(term), per: t(`cmp.per.${billing}` as StringKey) })}</p>
     </div>
