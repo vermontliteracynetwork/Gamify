@@ -16,7 +16,8 @@ import Title from '../ui/Title';
 // snap it in, play it, pick the next one). The psychology is the IKEA effect
 // (people value what they helped make, Norton, Mochon and Ariely 2012) and
 // student choice (autonomy raises engagement, Patall, Cooper and Robinson
-// 2008); the plan names sit in one small chip, never a sales line.
+// 2008). No plan names on it (owner, 2026-11-27: "remove plus and pro tag
+// and put this on the features page, not pricing").
 //
 // Photos: real beta classrooms only, each with its signed release on file
 // (docs/photo-brief.md). A slide with no photo yet shows its drawn stand-in.
@@ -56,10 +57,9 @@ export default function ThemeGallery() {
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onFocus={() => setHover(true)} onBlur={() => setHover(false)}>
       <div className="flex flex-wrap items-end gap-3">
         <div className="grid gap-1 flex-1 min-w-60">
-          <span className="justify-self-start rounded-pill bg-butter border-std border-border px-3 min-h-8 inline-flex items-center text-sm font-bold">{t('gallery.plans')}</span>
           <h2 id="gallery-title" className="title-bubble text-[2rem] sm:text-[2.75rem] leading-none"><Title text={t('gallery.title')} /></h2>
         </div>
-        <Link to="/features" className={buttonClasses('secondary', 'hover-pop')}>{t('pricing.themesLink')}<ArrowRight weight="bold" size={18} aria-hidden="true" /></Link>
+        <Link to="/themes" className={buttonClasses('secondary', 'hover-pop')}>{t('pricing.themesLink')}<ArrowRight weight="bold" size={18} aria-hidden="true" /></Link>
       </div>
 
       <div className="relative rounded-[1.75rem] border-[3.5px] border-border overflow-hidden bg-paper touch-pan-y" style={{ boxShadow: `0 8px 0 ${INK}` }}

@@ -63,14 +63,14 @@ export const TIERS: Record<Tier, TierLimits> = {
     setPerStudent: false, gamePerStudent: false, questionReports: false, reportsByStudent: false,
   },
   plus: {
-    hasClasses: true, classrooms: 3, studentsPerClassroom: 60, savedQuestionSets: 25, assignedSetsPerStudent: 1,
+    hasClasses: true, classrooms: 3, studentsPerClassroom: 30, savedQuestionSets: 25, assignedSetsPerStudent: 1,
     allGames: true, themesPlayable: true, themeBuilder: 'one-per-game', liveMonitorAndLock: true, liveMode: true,
     reportHistoryDays: UNLIMITED, homeworkDaysAhead: 0,
     studentList: true, customPictures: false, customLockMessage: false, homework: false, themeChoices: false,
     setPerStudent: true, gamePerStudent: false, questionReports: true, reportsByStudent: true,
   },
   pro: {
-    hasClasses: true, classrooms: UNLIMITED, studentsPerClassroom: UNLIMITED, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: UNLIMITED,
+    hasClasses: true, classrooms: UNLIMITED, studentsPerClassroom: 60, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: 5,
     allGames: true, themesPlayable: true, themeBuilder: 'unlimited', liveMonitorAndLock: true, liveMode: true,
     reportHistoryDays: UNLIMITED, homeworkDaysAhead: UNLIMITED,
     studentList: true, customPictures: true, customLockMessage: true, homework: true, themeChoices: true,

@@ -1,7 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Check, Minus } from '@phosphor-icons/react';
-import { isFreeGame, PRICES_USD, STUDENT_THEME_BUILDER, TIERS, billingMonths, type Billing, type Tier } from '../config';
-import { GAMES } from '../games/registry';
+import { STUDENT_THEME_BUILDER, TIERS, type Tier } from '../config';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { Tabs } from '../ui/kit';
@@ -10,7 +9,7 @@ import Title from '../ui/Title';
 // The detailed comparison chart (teacher, 2026-11-25: "shorten each plan and
 // then have a very detailed comparison chart"). One row per feature, a column
 // per plan, each row with a plain "what it means" line. Every value comes from
-// src/config.ts (TIERS, prices, the launch sale), the template rule in
+// src/config.ts (TIERS), the template rule in
 // src/theme/builder/templateAccess.tsx and the live plan copy; nothing new is
 // promised here. Laptops and tablets get one table with a sticky plan header;
 // phones pick one plan at a time, so nothing scrolls sideways.
@@ -21,36 +20,30 @@ interface Group { id: string; title: string; note?: string; rows: Row[] }
 
 const PLANS: Plan[] = ['free', 'plus', 'pro'];
 const fmt = (n: number) => (Number.isFinite(n) ? String(n) : t('pricing.unlimited'));
-const money = (n: number) => (n % 1 ? n.toFixed(2) : String(n));
 const all = () => true;
-const paid = (x: Plan) => x !== 'free';
-const pro = (x: Plan) => x === 'pro';
 
-export function compareGroups(billing: Billing): Group[] {
-  const freeNames = GAMES.filter((g) => isFreeGame(g.id)).map((g) => g.name);
-  const free = freeNames.length;
-  const games = GAMES.length;
-  const row = (label: StringKey, what: StringKey, value: Row['value'], vars?: Record<string, string | number>): Row => ({ label: t(label), what: t(what, vars), value });
+// Owner's chart edits, 2026-11-27: no pricing in the table (the plan cards
+// above carry it), rows combined where they say one thing, the crossed-out
+// rows gone, and Free described by what it gives (quick play, no setup)
+// rather than what it lacks. Paid rows read as "more of a good thing" (the
+// decoy and goal-gradient ideas: Plus as the full classroom, Pro as the
+// whole school), never as a list of locks.
+export function compareGroups(): Group[] {
+  const row = (label: StringKey, what: StringKey, value: Row['value']): Row => ({ label: t(label), what: t(what), value });
+  const perClass = (x: Plan) => (!TIERS[x].studentList ? t('cmp.students.none') : !Number.isFinite(TIERS[x].studentsPerClassroom) ? t('pricing.unlimited') : t('cmp.students.plus', { n: TIERS[x].studentsPerClassroom }));
   return [
     { id: 'games', title: t('cmp.s.games'), rows: [
-      row('pricing.row.games', 'cmp.games.what', (x) => (x === 'free' ? t('cmp.games.free', { n: free }) : x === 'pro' ? t('cmp.games.early', { n: games }) : t('cmp.games.all', { n: games })), { free: freeNames.join(', ') }),
-      row('pricing.row.early', 'cmp.early.what', pro),
-      row('activity.how.screen', 'cmp.screen.what', all),
-      row('activity.how.lobby', 'cmp.lobby.what', all),
-      row('activity.how.pairs', 'cmp.pairs.what', all),
-      row('cmp.liveMode', 'cmp.liveMode.what', (x) => TIERS[x].liveMode),
-      row('pricing.row.lobbyGoal', 'cmp.lobbyGoal.what', paid),
-      row('cmp.groups', 'cmp.groups.what', paid),
-      row('cmp.setEach', 'cmp.setEach.what', (x) => TIERS[x].setPerStudent),
+      row('pricing.row.games', 'cmp.games.what', (x) => (x === 'free' ? t('cmp.games.free') : t('cmp.games.all'))),
+      row('cmp.liveLobby', 'cmp.liveLobby.what', (x) => (TIERS[x].liveMode ? true : t('cmp.liveLobby.free'))),
+      row('cmp.groups', 'cmp.groups.what', (x) => TIERS[x].setPerStudent),
       row('pricing.row.each', 'cmp.each.what', (x) => TIERS[x].gamePerStudent),
-      row('pricing.row.board', 'cmp.board.what', pro),
-      row('cmp.themeChoices', 'cmp.themeChoices.what', (x) => TIERS[x].themeChoices),
+      row('pricing.row.board', 'cmp.board.what', (x) => TIERS[x].themeChoices),
+      row('cmp.homework', 'cmp.homework.what', (x) => TIERS[x].homework),
     ] },
     { id: 'classes', title: t('cmp.s.classes'), rows: [
       row('pricing.row.classes', 'cmp.classes.what', (x) => (!TIERS[x].studentList ? t('cmp.classes.none') : fmt(TIERS[x].classrooms))),
-      row('pricing.row.students', 'cmp.students.what', (x) => (!TIERS[x].studentList ? t('cmp.students.none') : !Number.isFinite(TIERS[x].studentsPerClassroom) ? t('pricing.unlimited') : t('cmp.students.plus', { n: TIERS[x].studentsPerClassroom }))),
-      row('cmp.signin', 'cmp.signin.what', (x) => (TIERS[x].studentList ? t('cmp.signin.list') : t('cmp.signin.free'))),
-      row('pricing.row.pictures', 'cmp.pictures.what', (x) => (TIERS[x].customPictures ? t('pricing.pictures.paid') : t('pricing.pictures.free'))),
+      row('pricing.row.students', 'cmp.students.what', perClass),
+      row('cmp.signin', 'cmp.signin.what', (x) => (!TIERS[x].studentList ? t('cmp.signin.free') : TIERS[x].customPictures ? t('cmp.signin.own') : t('cmp.signin.list'))),
     ] },
     { id: 'sets', title: t('cmp.s.sets'), rows: [
       row('pricing.row.sets', 'cmp.sets.what', (x) => fmt(TIERS[x].savedQuestionSets)),
@@ -61,14 +54,12 @@ export function compareGroups(billing: Billing): Group[] {
       row('pricing.row.themes', 'cmp.builder.what', (x) => ({ trial: t('pricing.themeTrial'), 'one-per-game': t('pricing.themeOne'), 'three-per-game': t('pricing.themeThree'), unlimited: t('pricing.unlimited') })[TIERS[x].themeBuilder]),
       ...(STUDENT_THEME_BUILDER ? [row('cmp.studio', 'cmp.studio.what', (x) => (TIERS[x].themeBuilder === 'trial' ? t('cmp.studio.free') : t('cmp.studio.paid')))] : []),
       row('pricing.row.library', 'cmp.libraryThemes.what', (x) => TIERS[x].themesPlayable),
-      row('pricing.row.guides', 'cmp.guides.what', (x) => (x === 'free' ? t('cmp.guides.free') : true)),
     ] },
     { id: 'live', title: t('cmp.s.live'), rows: [
       row('pricing.row.live', 'cmp.live.what', (x) => TIERS[x].liveMonitorAndLock),
-      row('cmp.lockMessage', 'cmp.lockMessage.what', (x) => (TIERS[x].customLockMessage ? true : TIERS[x].liveMonitorAndLock ? t('cmp.lockMessage.preset') : false)),
+      row('cmp.lockMessage', 'cmp.lockMessage.what', (x) => (TIERS[x].customLockMessage ? t('cmp.lockMessage.custom') : TIERS[x].liveMonitorAndLock ? t('cmp.lockMessage.preset') : false)),
       row('cmp.scores', 'cmp.scores.what', all),
-      row('cmp.results', 'cmp.results.what', (x) => TIERS[x].questionReports),
-      row('cmp.byStudent', 'cmp.byStudent.what', (x) => TIERS[x].reportsByStudent),
+      row('cmp.results', 'cmp.results.what', (x) => TIERS[x].questionReports && TIERS[x].reportsByStudent),
       row('pricing.row.reports', 'cmp.reports.what', (x) => (Number.isFinite(TIERS[x].reportHistoryDays) ? t('cmp.reports.today') : t('pricing.allTime'))),
     ] },
     { id: 'access', title: t('cmp.s.access'), note: t('cmp.s.accessNote'), rows: [
@@ -77,17 +68,9 @@ export function compareGroups(billing: Billing): Group[] {
       row('cmp.text', 'cmp.text.what', all),
       row('cmp.tries', 'cmp.tries.what', all),
     ] },
-    { id: 'homework', title: t('cmp.s.homework'), rows: [
-      row('activity.how.code', 'cmp.code.what', all),
-      row('cmp.homework', 'cmp.homework.what', (x) => TIERS[x].homework),
-      row('cmp.freshCode', 'cmp.freshCode.what', pro),
-      row('cmp.blog', 'cmp.blog.what', all),
-    ] },
-    { id: 'billing', title: t('cmp.s.billing'), rows: [
-      row('cmp.price', 'cmp.price.what', (x) => (x === 'free' ? t('cmp.price.free') : t('cmp.price.paid', { m: money(PRICES_USD[x][billing] / billingMonths(billing)), n: money(PRICES_USD[x][billing]), per: t(`cmp.per.${billing}` as StringKey) }))),
-      row('cmp.billing', 'cmp.billing.what', (x) => (x === 'free' ? t('cmp.billing.free') : t('cmp.billing.paid'))),
-      // The launch sale lives in the Marketing campaigns, not the feature chart (owner, 2026-11-26).
-      row('cmp.cancel', 'cmp.cancel.what', (x) => (x === 'free' ? t('cmp.cancel.free') : true)),
+    { id: 'privacy', title: t('cmp.s.privacy'), rows: [
+      row('cmp.freshCode', 'cmp.freshCode.what', all),
+      row('cmp.account', 'cmp.account.what', (x) => (Number.isFinite(TIERS[x].reportHistoryDays) ? t('cmp.reports.today') : true)),
       row('cmp.ads', 'cmp.ads.what', all),
     ] },
   ];
@@ -102,9 +85,9 @@ function Cell({ v }: { v: Value }) {
     : <><Minus weight="bold" size={22} className="text-muted shrink-0" aria-hidden="true" /><span className="sr-only">{t('pricing.no')}</span></>;
 }
 
-export default function CompareChart({ billing, titleClass }: { billing: Billing; titleClass: string }) {
+export default function CompareChart({ titleClass }: { titleClass: string }) {
   const [pick, setPick] = useState<Plan>('plus');
-  const groups = compareGroups(billing);
+  const groups = compareGroups();
   const shade = (x: Plan) => (x === 'plus' ? 'bg-butter/70' : '');
   return (
     <section id="compare" aria-labelledby="compare-title" className="grid gap-4 mt-4 scroll-mt-20">

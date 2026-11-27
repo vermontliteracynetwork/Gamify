@@ -13,7 +13,6 @@ import { ScrapbookPage } from './scrapbook/Shell';
 import Accordion from '../ui/Accordion';
 import CompareChart from './CompareChart';
 import LaunchSaleBanner from './LaunchSaleBanner';
-import ThemeGallery from './ThemeGallery';
 
 // Plans and pricing, value first (teacher, 2026-10-25): what a teacher gets
 // comes before what it costs, the monthly price is the big number with the
@@ -90,9 +89,8 @@ export default function PricingPage() {
           <ArrowRight weight="bold" size={24} aria-hidden="true" />
         </Link>
 
-        <ThemeGallery />
 
-        <CompareChart billing={billing} titleClass={H2} />
+        <CompareChart titleClass={H2} />
 
         <SchoolPlans />
 

@@ -288,7 +288,7 @@ const money = (n: number) => (n % 1 ? n.toFixed(2) : String(n));
 function Pricing({ w }: W) {
   const p = isPh(w);
   const tiers = ['free', 'plus', 'pro'] as const;
-  const groups = compareGroups('year').slice(0, 2);
+  const groups = compareGroups().slice(0, 2);
   const Val = ({ v }: { v: boolean | string }) => (v === true ? <Check weight="bold" size={22} color={PP.kelly} aria-label={t('pricing.yes')} /> : v === false ? <Minus weight="bold" size={20} color={PP.quiet} aria-label={t('pricing.no')} /> : <span className="font-semibold">{v}</span>);
   return (
     <Page w={w} on="public.nav.pricing">

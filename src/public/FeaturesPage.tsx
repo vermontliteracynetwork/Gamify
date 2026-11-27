@@ -19,6 +19,7 @@ import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import PublicFooter from './PublicFooter';
+import ThemeGallery from './ThemeGallery';
 import { useScrapbookGround } from './scrapbook/Shell';
 
 // The Features page, rebuilt as the main selling page (owner, 2026-11-26:
@@ -107,6 +108,9 @@ export default function FeaturesPage() {
             ))}
           </ul>
         </motion.section>
+
+        {/* Made by your class: the theme story in pictures (owner, 2026-11-27). */}
+        <ThemeGallery />
 
         {/* Fair play, built in (teacher, 2026-11-24: "add the no stealing as a selling
             point ... psychology first marketing"). Each line answers a weak spot the

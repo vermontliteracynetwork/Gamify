@@ -245,8 +245,9 @@ want in the carosel and promotional otherwise."
     confetti, days-left chip, renewal line kept. Built; to check in a browser.
 51. [x] **"Nothing is ever deleted" removed** from pricing chips, the compare
     chart, the upgrade box, the beta page and the /brand mockups.
-52. [ ] **"Made by your class" carousel** replaces "Themes are why teachers
-    upgrade" on Pricing: draw it, snap it in, play it, pick the next one.
+52. [ ] **"Made by your class" carousel** on the Features page (owner: "remove
+    plus and pro tag and put this on the features page, not pricing"); the
+    "Themes are why teachers upgrade" line is gone from Pricing: draw it, snap it in, play it, pick the next one.
     Drawn stand-ins until released beta photos arrive. Built; to check.
 53. [ ] **Question sets as a card wall** (her screenshots): My sets and the
     library as masonry picture cards, a headed search panel at the left of the
@@ -259,3 +260,14 @@ want in the carosel and promotional otherwise."
     Director.
 55. [ ] **Beta photos**: shot list and release rules in docs/photo-brief.md;
     the beta application needs the photo release step (Waiting on you).
+56. [ ] **Compare Every Feature edits** (owner, 2026-11-27, marked-up
+    screenshots): crossed-out rows removed (new games early, on the big
+    screen, in pairs, sign-in pictures, theme guide templates, a code to play
+    on their own, every guide); circled rows combined (live class lobby;
+    groups and a set for each student; choice boards with themes; question
+    and student reports); "All games"; Free reworded to show value (quick
+    play, no setup, no list to keep, roll a fun name); Plus 30 students per
+    class, Pro 60, Pro 5 sets per student; Lock message default (Plus) or
+    your own (Pro); report history 24 hours; new Privacy and data section
+    (fresh lobby code every plan, Account data, No ads, ever); no pricing rows.
+    Built; to check.
