@@ -6,7 +6,7 @@ import { setTeacher, useTeacher } from '../auth/session';
 import { cloudLogIn, cloudOn, cloudSignUp } from '../auth/cloudAuth';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
-import { Button, Tabs, fieldClasses } from '../ui/kit';
+import { Button, buttonClasses, Tabs, fieldClasses } from '../ui/kit';
 import { ScrapbookPage } from './scrapbook/Shell';
 import { openUpgrade } from '../billing/Upgrade';
 import { upgradeTo } from '../billing/upgrade';
@@ -134,7 +134,8 @@ export default function LoginPage() {
           {mode === 'login' && <button type="button" onClick={() => setMode('signup')} className="font-bold underline justify-self-center min-h-11">{t('login.noAccount')}</button>}
         </form>
         {/* Students: the quiet line from the mockup, with the way to Join. */}
-        <p className="m-0 text-center font-semibold text-muted">{t('login.students')} <Link to="/join" className="font-bold text-text underline underline-offset-4 whitespace-nowrap">{t('public.joinCode')}</Link></p>
+        {/* Students: one magenta button the size of Log in (owner, 2026-11-27). */}
+        <Link to="/join" className={buttonClasses('main', 'min-h-14 text-lg hover-pop justify-center !bg-[#e0218a] !text-white no-underline')}>{t('login.joinGame')}</Link>
       </div>
     </main>
     </ScrapbookPage>
