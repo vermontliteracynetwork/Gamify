@@ -91,7 +91,8 @@ test('Game Show: category grid, class vs the computer', async ({ page }, info) =
   // Power-ups have their own page (teacher, 2026-11-13).
   while (!(await page.getByRole('button', { name: /^Remove / }).first().isVisible())) await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('button', { name: /^Remove / }).first().click();
-  await expect(page.getByRole('radiogroup', { name: 'Who is the other side?' })).toBeVisible();
+  // One team plays the computer; there is no other-side choice (owner, 2026-11-27).
+  await expect(page.getByRole('radiogroup', { name: 'Who is the other side?' })).toHaveCount(0);
   await page.screenshot({ path: `test-results/gameshow-setup-teams-${info.project.name}.png` });
   await finishSetup(page);
   await startTurn(page);
@@ -116,17 +117,15 @@ test('Game Show: teams from the class list, balanced, and saved', async ({ page 
   });
   await openSetup(page, '/games/game-show');
   await page.getByRole('radio', { name: 'Surprise cards' }).click();
-  // Students go on teams in a full page opened by a small button (teacher, 2026-11-06).
-  await showSetting(page, page.getByRole('button', { name: 'Students on teams' }));
-  await page.getByRole('button', { name: 'Students on teams' }).click();
+  // Students go on teams right under the teams, each as their own card (owner, 2026-11-27).
+  await showSetting(page, page.getByLabel('Class list'));
   await page.getByLabel('Class list').selectOption('c1');
   await page.getByRole('button', { name: 'Balanced teams' }).click();
-  await expect(page.getByRole('group').first().getByRole('button')).toHaveCount(2);
+  await expect(page.getByRole('listitem').filter({ hasText: /^(Ava|Ben|Cal|Dee)$/ })).toHaveCount(4);
   await page.getByLabel('Name these teams').fill('Reading groups');
   await page.getByRole('button', { name: 'Save teams' }).click();
   await expect(page.getByRole('button', { name: 'Reading groups' })).toBeVisible();
   await page.screenshot({ path: `test-results/gameshow-class-teams-${info.project.name}.png`, fullPage: true });
-  await page.getByRole('button', { name: 'Done', exact: true }).click();
   await finishSetup(page);
   await startTurn(page);
   // A different student answers each turn (market research, 2026-10-31).

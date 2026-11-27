@@ -3358,7 +3358,7 @@ export const en = {
   'mm.pairsN': '{n} pairs',
   'mm.who': 'Who is playing?',
   'mm.solo': 'Just me',
-  'mm.two': 'Two players or the computer',
+  'mm.two': 'Against the computer',
   'mm.found': '{found} of {total} pairs',
   'mm.moves': '{count} turns',
   'mm.moves.one': '1 turn',

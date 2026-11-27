@@ -60,7 +60,6 @@ test('Pinball Versus: the computer shoots and play comes back to the player', as
     if (await next.isDisabled()) { await page.getByRole('radio', { name: /^Solo/ }).click(); await page.getByRole('radio', { name: 'Me against the computer' }).click(); }
     await next.click();
   }
-  await page.getByRole('button', { name: 'Person' }).click(); // player 2 becomes the computer
   await finishSetup(page); // power-ups come last, then Play
   await answerShare(page, true);
   await page.getByRole('button', { name: 'Shoot up lane 2' }).click();

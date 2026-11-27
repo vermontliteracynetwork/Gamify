@@ -56,6 +56,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   const still = settings.motion === 'still';
   const [slots, setSlots] = useState<Slot[]>(() => {
     if (alone) return [{ name: session.name, kind: human }, { name: cpuName, kind: 'cpu' as const }].map(keyed);
+    // Against the computer (the Solo way), player 2 is the computer; there is no person/computer switch (owner, 2026-11-27).
     if (vsComputer) return [{ name: rollName(), kind: human }, { name: cpuName, kind: 'cpu' as const }].map(keyed);
     const first = rollName();
     return [{ name: first, kind: human }, { name: rollName(Math.random, [first]), kind: human }].slice(0, how === 'class' && min <= 1 ? 1 : Math.max(min, 2)).map(keyed);

@@ -21,7 +21,6 @@ for (const h of HOW_TO_PLAY) {
     await openSetup(page, `/games/${h.gameId}`);
     await page.waitForTimeout(400);
     await shot('setup');
-    if (h.gameId === 'four-in-a-row') await page.getByRole('button', { name: 'Person' }).click().catch(() => {});
     await finishSetup(page);
     await page.waitForTimeout(800);
     // The turn card (icon only) comes first in team games; tap it away.

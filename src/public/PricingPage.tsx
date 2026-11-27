@@ -216,7 +216,7 @@ function StackedPrice({ plan, billing, big }: { plan: 'plus' | 'pro'; billing: B
       {(lengthSave > 0 || sale) && <p className="m-0 text-lg font-bold text-muted line-through decoration-2 tabular-nums">{t('pricing.stack.was', { m: m2(standard) })}</p>}
       {lengthSave > 0 && <p className="m-0 font-bold tabular-nums" style={{ color: BRIGHT }}>{t('pricing.stack.length', { pct: lengthSave, label: t(`pricing.stack.${billing}` as StringKey) })}</p>}
       {sale && <p className="m-0 font-bold tabular-nums" style={{ color: BRIGHT }}>{t('pricing.stack.sale', { pct: off, name: LAUNCH_OFFER.name })}</p>}
-      <p className="m-0 flex flex-wrap items-baseline gap-x-2"><span className={`font-display leading-none tabular-nums ${big ? 'text-6xl' : 'text-5xl'}`}>${m2(final)}</span><span className="text-lg font-bold">{t('upgrade.perMonth')}</span></p>
+      <p className="m-0 flex flex-wrap items-baseline gap-x-2"><span className={`title-bubble leading-none tabular-nums ${big ? 'text-6xl' : 'text-5xl'}`}>${m2(final)}</span><span className="text-lg font-bold">{t('upgrade.perMonth')}</span></p>
       {totalSave > 0 && <span className="justify-self-start rounded-pill px-3 min-h-8 inline-flex items-center text-sm font-bold text-white border-std border-border" style={{ background: BRIGHT }}>{t('pricing.stack.total', { pct: totalSave })}</span>}
       <p className="m-0 text-xs font-semibold text-muted">{sale ? t('pricing.stack.fine', { first: m2(term * (1 - LAUNCH_OFFER.discount)), n: m2(term), per: t(`cmp.per.${billing}` as StringKey) }) : t('pricing.stack.fineNoSale', { n: m2(term), per: t(`cmp.per.${billing}` as StringKey) })}</p>
     </div>

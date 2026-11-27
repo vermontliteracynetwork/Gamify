@@ -391,7 +391,7 @@ export default function Pinball() {
           ) },
           ...(solo ? [] : [setup.who === 'versus'
             // Every Share game can also be played Versus: two players head to head, or one against the computer (teacher, 2026-10-31).
-            ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" min={2} max={2} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }
+            ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" vsComputer min={2} max={2} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }
             : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key="share" mode="share" min={1} max={10} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }]),
         ]} />
       )}

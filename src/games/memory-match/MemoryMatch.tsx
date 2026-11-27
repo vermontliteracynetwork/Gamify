@@ -176,7 +176,7 @@ export default function MemoryMatch() {
               <ChoiceRow label={t('mm.who')} value={setup.players} onChange={(v) => change({ players: v })} options={[{ value: 'solo', label: t('mm.solo') }, { value: 'two', label: t('mm.two') }]} />
             </>
           ) },
-          ...(setup.players === 'two' ? [{ id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup mode="versus" min={2} max={2} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }] : []),
+          ...(setup.players === 'two' ? [{ id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup mode="versus" vsComputer min={2} max={2} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }] : []),
         ]} />
       )}
 

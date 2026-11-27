@@ -17,7 +17,6 @@ test('game boards fit the screen without scrolling', async ({ page }) => {
   await noScroll(page);
 
   await openSetup(page, '/games/four-in-a-row');
-  await page.getByRole('button', { name: 'Person' }).click();
   await finishSetup(page);
   await expect(page.getByRole('gridcell')).toHaveCount(42);
   await noScroll(page);

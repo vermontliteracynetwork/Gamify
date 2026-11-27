@@ -433,3 +433,7 @@ want in the carosel and promotional otherwise."
     theme for one game OR they can have unlimited game and theme selection
     for the students to choose from"): build the three homework modes in
     Create an Activity; marketing point: student autonomy.
+96. [ ] **Four in a Row on two devices test fails** (found 2026-11-27; it also
+    fails on the commit before today's work, so it is older): Share a join
+    code starts a local game instead of the Waiting for Your Friend screen.
+    To fix next.

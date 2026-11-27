@@ -309,8 +309,12 @@ test('developer view opens with the owner PIN and links to the Theme Builder', a
   await page.screenshot({ path: `test-results/owner-${test.info().project.name}.png` });
   // One screen: the page itself never scrolls.
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  // The urgent pop-up opens first (owner, 2026-11-27); close it for now.
+  const urgent = page.getByRole('dialog', { name: 'Do these first' });
+  if (await urgent.isVisible()) await urgent.getByRole('button', { name: 'Close for now' }).click();
   await page.getByRole('link', { name: 'Theme Builder' }).click();
-  await expect(page.getByRole('heading', { name: 'Library Themes' })).toBeVisible();
+  // The owner sees the same Theme Builder as teachers (owner, 2026-11-27).
+  await expect(page.getByRole('heading', { name: 'Theme Builder' })).toBeVisible();
 });
 
 test('Theme Builder fits the screen: tabs and pages, no scrolling', async ({ page }, info) => {
